@@ -1,0 +1,45 @@
+{
+  "$schema": "https://easypanel.io/schema.json",
+  "name": "zkm",
+  "description": "Zaneva Konsinyasi Manager",
+  "services": [
+    {
+      "name": "app",
+      "type": "app",
+      "build": {
+        "type": "dockerfile",
+        "dockerfile": "Dockerfile"
+      },
+      "domains": [
+        {
+          "host": "zkm.yourdomain.com",
+          "port": 3000
+        }
+      ],
+      "env": {
+        "DATABASE_URL": "postgresql://zkm:CHANGE_ME@zkm-db:5432/zaneva_konsinyasi?schema=public",
+        "SESSION_SECRET": "CHANGE_ME_TO_RANDOM_32_CHARS",
+        "N8N_WEBHOOK_URL": "",
+        "N8N_WEBHOOK_SECRET": "",
+        "NEXT_PUBLIC_APP_URL": "https://zkm.yourdomain.com",
+        "NODE_ENV": "production"
+      }
+    },
+    {
+      "name": "db",
+      "type": "postgres",
+      "image": "postgres:16-alpine",
+      "env": {
+        "POSTGRES_DB": "zaneva_konsinyasi",
+        "POSTGRES_USER": "zkm",
+        "POSTGRES_PASSWORD": "CHANGE_ME"
+      },
+      "volumes": [
+        {
+          "name": "zkm-postgres",
+          "mountPath": "/var/lib/postgresql/data"
+        }
+      ]
+    }
+  ]
+}

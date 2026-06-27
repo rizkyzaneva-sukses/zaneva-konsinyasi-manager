@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zkm-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://zkm:zkm_password@db:5432/zaneva_konsinyasi?schema=public
+      - SESSION_SECRET=${SESSION_SECRET:-zkm-super-secret-key-change-in-production-2024}
+      - N8N_WEBHOOK_URL=${N8N_WEBHOOK_URL:-http://host.docker.internal:5678/webhook/zkm}
+      - N8N_WEBHOOK_SECRET=${N8N_WEBHOOK_SECRET:-}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      - NODE_ENV=production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - zkm-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: zkm-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=zaneva_konsinyasi
+      - POSTGRES_USER=zkm
+      - POSTGRES_PASSWORD=zkm_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zkm -d zaneva_konsinyasi"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - zkm-network
+
+volumes:
+  postgres_data:
+
+networks:
+  zkm-network:
+    driver: bridge

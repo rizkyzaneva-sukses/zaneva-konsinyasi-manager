@@ -1,0 +1,220 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  VENUE
+}
+
+enum VenueStatus {
+  PROSPEK
+  NEGO
+  AKTIF
+  NONAKTIF
+}
+
+enum InvoiceStatus {
+  BELUM_DIBAYAR
+  SUDAH_DIBAYAR
+  TELAT
+}
+
+enum JenisStokMasuk {
+  DROP_AWAL
+  RESTOCK
+  PENARIKAN
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  nama         String
+  username     String   @unique
+  passwordHash String
+  role         Role
+  venueId      String?  @db.Uuid
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  venue        Venue?   @relation(fields: [venueId], references: [id])
+  auditLogs    AuditLog[]
+  stokMasuk    StokMasuk[]
+  laporanPenjualan LaporanPenjualan[]
+
+  @@index([venueId])
+  @@index([role])
+}
+
+model Venue {
+  id                   String      @id @default(uuid()) @db.Uuid
+  nama                 String
+  alamat               String
+  picNama              String
+  picKontakWa          String
+  status               VenueStatus @default(PROSPEK)
+  marginPersenZaneva   Int         @default(30)
+  periodeSettlementHari Int        @default(14)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+
+  users                User[]
+  stokMasuk            StokMasuk[]
+  laporanPenjualan     LaporanPenjualan[]
+  invoices             Invoice[]
+  returBarang          ReturBarang[]
+
+  @@index([status])
+}
+
+model Produk {
+  id        String   @id @default(uuid()) @db.Uuid
+  nama      String
+  sku       String   @unique
+  kategori  String
+  hargaJual Int
+  foto      String?
+  aktif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  stokMasuk        StokMasuk[]
+  laporanPenjualan LaporanPenjualan[]
+  invoiceItems     InvoiceItem[]
+  returBarang      ReturBarang[]
+
+  @@index([kategori])
+  @@index([sku])
+}
+
+model StokMasuk {
+  id          String         @id @default(uuid()) @db.Uuid
+  venueId     String         @db.Uuid
+  produkId    String         @db.Uuid
+  qty         Int
+  jenis       JenisStokMasuk
+  tanggal     DateTime       @default(now())
+  dokumenUrl  String?
+  keterangan  String?
+  createdBy   String         @db.Uuid
+  createdAt   DateTime       @default(now())
+
+  venue       Venue          @relation(fields: [venueId], references: [id])
+  produk      Produk         @relation(fields: [produkId], references: [id])
+  user        User           @relation(fields: [createdBy], references: [id])
+
+  @@index([venueId])
+  @@index([produkId])
+  @@index([tanggal])
+}
+
+model LaporanPenjualan {
+  id          String   @id @default(uuid()) @db.Uuid
+  venueId     String   @db.Uuid
+  produkId    String   @db.Uuid
+  qtyTerjual  Int
+  qtyRetur    Int      @default(0)
+  tanggal     DateTime @default(now())
+  keterangan  String?
+  inputBy     String   @db.Uuid
+  createdAt   DateTime @default(now())
+
+  venue       Venue    @relation(fields: [venueId], references: [id])
+  produk      Produk   @relation(fields: [produkId], references: [id])
+  user        User     @relation(fields: [inputBy], references: [id])
+
+  @@index([venueId])
+  @@index([produkId])
+  @@index([tanggal])
+}
+
+model Invoice {
+  id            String        @id @default(uuid()) @db.Uuid
+  venueId       String        @db.Uuid
+  periodeMulai  DateTime      @db.Date
+  periodeAkhir  DateTime      @db.Date
+  totalTagihan  Int
+  status        InvoiceStatus @default(BELUM_DIBAYAR)
+  jatuhTempo    DateTime      @db.Date
+  dokumenUrl    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  venue         Venue         @relation(fields: [venueId], references: [id])
+  items         InvoiceItem[]
+  pembayaran    Pembayaran[]
+
+  @@index([venueId])
+  @@index([status])
+  @@index([jatuhTempo])
+}
+
+model InvoiceItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  invoiceId   String  @db.Uuid
+  produkId    String  @db.Uuid
+  qtyTerjual  Int
+  hargaSatuan Int
+  subtotal    Int
+
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  produk      Produk  @relation(fields: [produkId], references: [id])
+
+  @@index([invoiceId])
+}
+
+model Pembayaran {
+  id                String   @id @default(uuid()) @db.Uuid
+  invoiceId         String   @db.Uuid
+  tanggalBayar      DateTime @default(now())
+  jumlah            Int
+  buktiTransferUrl  String?
+  dokumenKwitansiUrl String?
+  keterangan        String?
+  createdAt         DateTime @default(now())
+
+  invoice             Invoice @relation(fields: [invoiceId], references: [id])
+
+  @@index([invoiceId])
+}
+
+model ReturBarang {
+  id        String   @id @default(uuid()) @db.Uuid
+  venueId   String   @db.Uuid
+  produkId  String   @db.Uuid
+  qty       Int
+  kondisi   String
+  alasan    String
+  tanggal   DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  produk    Produk   @relation(fields: [produkId], references: [id])
+
+  @@index([venueId])
+  @@index([produkId])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid()) @db.Uuid
+  userId       String   @db.Uuid
+  aksi         String
+  tabelTerkait String
+  recordId     String
+  dataSebelum  Json?
+  dataSesudah  Json?
+  keterangan   String?
+  timestamp    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([tabelTerkait])
+  @@index([recordId])
+  @@index([timestamp])
+}
