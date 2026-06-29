@@ -17,6 +17,7 @@ import {
   Sun,
   Moon,
   Trophy,
+  BookOpen,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -35,6 +36,7 @@ const adminMenuItems = [
   { href: '/dashboard/payments', label: 'Pembayaran', icon: CreditCard },
   { href: '/dashboard/returns', label: 'Retur', icon: RotateCcw },
   { href: '/dashboard/audit', label: 'Audit Trail', icon: ClipboardList },
+  { href: '/dashboard/panduan', label: 'Panduan', icon: BookOpen },
 ];
 
 const staffMenuItems = [
@@ -47,6 +49,7 @@ const staffMenuItems = [
   { href: '/dashboard/invoices', label: 'Invoice', icon: FileText },
   { href: '/dashboard/payments', label: 'Pembayaran', icon: CreditCard },
   { href: '/dashboard/returns', label: 'Retur', icon: RotateCcw },
+  { href: '/dashboard/panduan', label: 'Panduan', icon: BookOpen },
 ];
 
 const venueMenuItems = [
@@ -54,6 +57,7 @@ const venueMenuItems = [
   { href: '/venue/sales', label: 'Input Penjualan', icon: ShoppingCart },
   { href: '/venue/returns', label: 'Retur', icon: RotateCcw },
   { href: '/venue/history', label: 'Riwayat', icon: ClipboardList },
+  { href: '/venue/panduan', label: 'Panduan', icon: BookOpen },
 ];
 
 export function Sidebar({ role }: SidebarProps) {
