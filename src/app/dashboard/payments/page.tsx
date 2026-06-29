@@ -3,8 +3,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { formatRupiah, formatDate, getStatusColor, getStatusLabel } from '@/lib/utils';
-import { X, CreditCard, CheckCircle } from 'lucide-react';
+import { X, CreditCard, CheckCircle, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { exportToPDF, exportToExcel } from '@/lib/export';
 
 interface Invoice {
   id: string;
@@ -35,6 +36,7 @@ export default function PaymentsPage() {
   const [form, setForm] = useState({ invoiceId: '', jumlah: 0, keterangan: '' });
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -103,15 +105,76 @@ export default function PaymentsPage() {
 
   const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.totalTagihan, 0);
 
+  const handleExportPDF = async () => {
+    if (paymentHistory.length === 0) {
+      toast.error('Tidak ada data pembayaran untuk diekspor');
+      return;
+    }
+    setExporting('pdf');
+    try {
+      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Keterangan'];
+      const data = paymentHistory.map((p) => [
+        formatDate(p.tanggal),
+        p.invoice?.noInvoice || '',
+        p.invoice?.venue?.nama || '',
+        p.jumlah,
+        p.keterangan || '-',
+      ]);
+      const total = paymentHistory.reduce((sum, p) => sum + p.jumlah, 0);
+      data.push(['', '', 'TOTAL', total, '']);
+      exportToPDF('Riwayat Pembayaran', headers, data, `pembayaran-${new Date().toISOString().slice(0, 10)}`,
+        `${paymentHistory.length} transaksi pembayaran`);
+      toast.success('PDF berhasil diunduh');
+    } catch {
+      toast.error('Gagal mengekspor PDF');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportExcel = () => {
+    if (paymentHistory.length === 0) {
+      toast.error('Tidak ada data pembayaran untuk diekspor');
+      return;
+    }
+    setExporting('excel');
+    try {
+      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Keterangan'];
+      const data = paymentHistory.map((p) => [
+        p.tanggal,
+        p.invoice?.noInvoice || '',
+        p.invoice?.venue?.nama || '',
+        p.jumlah,
+        p.keterangan || '',
+      ]);
+      exportToExcel(headers, data, `pembayaran-${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Excel berhasil diunduh');
+    } catch {
+      toast.error('Gagal mengekspor Excel');
+    } finally {
+      setExporting(null);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Pembayaran</h3>
-          <div className="card px-4 py-2">
-            <p className="text-xs text-[hsl(var(--muted-foreground))]">Total Belum Dibayar</p>
-            <p className="text-[hsl(var(--primary))] font-bold text-lg">{formatRupiah(totalUnpaid)}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={handleExportPDF} disabled={exporting === 'pdf'} className="btn-secondary flex items-center gap-2 text-sm">
+              {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              Export PDF
+            </button>
+            <button onClick={handleExportExcel} disabled={exporting === 'excel'} className="btn-secondary flex items-center gap-2 text-sm">
+              {exporting === 'excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
+              Export Excel
+            </button>
+            <div className="card px-4 py-2">
+              <p className="text-xs text-[hsl(var(--muted-foreground))]">Total Belum Dibayar</p>
+              <p className="text-[hsl(var(--primary))] font-bold text-lg">{formatRupiah(totalUnpaid)}</p>
+            </div>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { getStatusLabel } from '@/lib/utils';
 import { stokMasukSchema } from '@/lib/validations';
-import { Plus, X, Loader2, Package } from 'lucide-react';
+import { Plus, X, Loader2, Package, Copy, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface StockItem {
@@ -48,6 +48,16 @@ export default function StockPage() {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState(defaultForm);
+
+  // Bulk assign states
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkVenueId, setBulkVenueId] = useState('');
+  const [bulkJenis, setBulkJenis] = useState('RESTOCK');
+  const [bulkRows, setBulkRows] = useState<{ produkId: string; qty: number }[]>([
+    { produkId: '', qty: 1 },
+  ]);
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [bulkErrors, setBulkErrors] = useState<Record<number, string>>({});
 
   useEffect(() => {
     Promise.all([
@@ -162,6 +172,97 @@ export default function StockPage() {
     return 'bg-green-500/10';
   };
 
+  // Bulk assign handlers
+  const openBulkModal = () => {
+    setBulkVenueId(selectedVenue);
+    setBulkJenis('RESTOCK');
+    setBulkRows([{ produkId: '', qty: 1 }]);
+    setBulkErrors({});
+    setShowBulkModal(true);
+  };
+
+  const closeBulkModal = () => {
+    setShowBulkModal(false);
+    setBulkErrors({});
+  };
+
+  const addBulkRow = () => {
+    setBulkRows([...bulkRows, { produkId: '', qty: 1 }]);
+  };
+
+  const removeBulkRow = (index: number) => {
+    if (bulkRows.length <= 1) return;
+    setBulkRows(bulkRows.filter((_, i) => i !== index));
+  };
+
+  const updateBulkRow = (index: number, field: 'produkId' | 'qty', value: string | number) => {
+    const updated = [...bulkRows];
+    updated[index] = { ...updated[index], [field]: value };
+    setBulkRows(updated);
+  };
+
+  const validateBulk = (): boolean => {
+    const newErrors: Record<number, string> = {};
+    if (!bulkVenueId) {
+      toast.error('Pilih venue terlebih dahulu');
+      return false;
+    }
+    bulkRows.forEach((row, i) => {
+      if (!row.produkId) {
+        newErrors[i] = 'Pilih produk';
+      } else if (row.qty <= 0) {
+        newErrors[i] = 'Qty harus > 0';
+      }
+    });
+    setBulkErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleBulkSubmit = async () => {
+    if (!validateBulk()) return;
+
+    setBulkSaving(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    try {
+      const promises = bulkRows.map(async (row) => {
+        const res = await fetch('/api/stock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            venueId: bulkVenueId,
+            produkId: row.produkId,
+            qty: Number(row.qty),
+            jenis: bulkJenis,
+            keterangan: 'Bulk assign',
+          }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          successCount++;
+        } else {
+          errorCount++;
+        }
+      });
+
+      await Promise.all(promises);
+
+      if (successCount > 0) {
+        toast.success(`${successCount} stok berhasil ditambahkan`);
+        closeBulkModal();
+        if (selectedVenue) fetchStock(selectedVenue);
+      }
+      if (errorCount > 0) {
+        toast.error(`${errorCount} stok gagal ditambahkan`);
+      }
+    } catch {
+      toast.error('Terjadi kesalahan koneksi');
+    } finally {
+      setBulkSaving(false);
+    }
+  };
+
   if (initialLoading) {
     return (
       <DashboardLayout>
@@ -181,13 +282,22 @@ export default function StockPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Stok per Venue</h3>
-          <button
-            onClick={openModal}
-            className="btn-primary flex items-center gap-2"
-            disabled={!selectedVenue}
-          >
-            <Plus className="w-4 h-4" /> Tambah Stok
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={openBulkModal}
+              className="btn-secondary flex items-center gap-2 text-sm"
+              disabled={!selectedVenue}
+            >
+              <Copy className="w-4 h-4" /> Bulk Assign
+            </button>
+            <button
+              onClick={openModal}
+              className="btn-primary flex items-center gap-2"
+              disabled={!selectedVenue}
+            >
+              <Plus className="w-4 h-4" /> Tambah Stok
+            </button>
+          </div>
         </div>
 
         {/* Venue Selector */}
@@ -372,6 +482,131 @@ export default function StockPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Assign Modal */}
+      {showBulkModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onKeyDown={(e) => e.key === 'Escape' && closeBulkModal()}
+        >
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeBulkModal} />
+          <div className="relative bg-[hsl(var(--modal-bg))] border border-[hsl(var(--modal-border))] rounded-xl w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
+              <h4 className="text-lg font-semibold font-display text-[hsl(var(--foreground))] flex items-center gap-2">
+                <Copy className="w-5 h-5 text-[hsl(var(--primary))]" />
+                Bulk Assign Stok
+              </h4>
+              <button onClick={closeBulkModal} className="p-1 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Venue Tujuan</label>
+                  <select
+                    value={bulkVenueId}
+                    onChange={(e) => setBulkVenueId(e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="">Pilih Venue</option>
+                    {venues.map((v) => (
+                      <option key={v.id} value={v.id}>{v.nama}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Jenis</label>
+                  <select
+                    value={bulkJenis}
+                    onChange={(e) => setBulkJenis(e.target.value)}
+                    className="input-field"
+                  >
+                    <option value="DROP_AWAL">Drop Awal</option>
+                    <option value="RESTOCK">Restock</option>
+                    <option value="PENARIKAN">Penarikan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-[hsl(var(--foreground))]">Produk & Qty</label>
+                  <button onClick={addBulkRow} className="text-xs text-[hsl(var(--primary))] hover:underline flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Tambah Baris
+                  </button>
+                </div>
+
+                <div className="card overflow-hidden p-0">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[hsl(var(--border))]">
+                        <th className="text-left py-2 px-3 text-[hsl(var(--table-header))] font-medium w-8">#</th>
+                        <th className="text-left py-2 px-3 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                        <th className="text-left py-2 px-3 text-[hsl(var(--table-header))] font-medium w-24">Qty</th>
+                        <th className="w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bulkRows.map((row, idx) => (
+                        <tr key={idx} className="border-b border-[hsl(var(--table-border))]">
+                          <td className="py-2 px-3 text-[hsl(var(--muted-foreground))] text-xs">{idx + 1}</td>
+                          <td className="py-2 px-3">
+                            <select
+                              value={row.produkId}
+                              onChange={(e) => updateBulkRow(idx, 'produkId', e.target.value)}
+                              className={`input-field text-sm py-1 ${bulkErrors[idx] ? 'border-red-500' : ''}`}
+                            >
+                              <option value="">Pilih Produk</option>
+                              {produks.map((p) => (
+                                <option key={p.id} value={p.id}>{p.nama}</option>
+                              ))}
+                            </select>
+                            {bulkErrors[idx] && (
+                              <p className="text-red-500 text-xs mt-0.5">{bulkErrors[idx]}</p>
+                            )}
+                          </td>
+                          <td className="py-2 px-3">
+                            <input
+                              type="number"
+                              value={row.qty}
+                              onChange={(e) => updateBulkRow(idx, 'qty', parseInt(e.target.value) || 0)}
+                              className="input-field text-sm py-1 w-20"
+                              min={1}
+                            />
+                          </td>
+                          <td className="py-2 px-2">
+                            <button
+                              onClick={() => removeBulkRow(idx)}
+                              disabled={bulkRows.length <= 1}
+                              className="p-1 hover:bg-[hsl(var(--surface-hover))] rounded disabled:opacity-30"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={handleBulkSubmit}
+                  disabled={bulkSaving || bulkRows.length === 0}
+                  className="btn-primary flex items-center gap-2 flex-1"
+                >
+                  {bulkSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+                  Submit {bulkRows.length} Item
+                </button>
+                <button onClick={closeBulkModal} className="btn-secondary">Batal</button>
+              </div>
+            </div>
           </div>
         </div>
       )}

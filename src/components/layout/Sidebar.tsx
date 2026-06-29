@@ -16,6 +16,7 @@ import {
   LogOut,
   Sun,
   Moon,
+  Trophy,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -26,6 +27,7 @@ interface SidebarProps {
 const adminMenuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/venues', label: 'Venue', icon: Building2 },
+  { href: '/dashboard/venues/scorecard', label: 'Scorecard', icon: Trophy },
   { href: '/dashboard/produk', label: 'Produk', icon: Package },
   { href: '/dashboard/stock', label: 'Stok', icon: Truck },
   { href: '/dashboard/sales', label: 'Penjualan', icon: ShoppingCart },
@@ -38,6 +40,7 @@ const adminMenuItems = [
 const staffMenuItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/venues', label: 'Venue', icon: Building2 },
+  { href: '/dashboard/venues/scorecard', label: 'Scorecard', icon: Trophy },
   { href: '/dashboard/produk', label: 'Produk', icon: Package },
   { href: '/dashboard/stock', label: 'Stok', icon: Truck },
   { href: '/dashboard/sales', label: 'Penjualan', icon: ShoppingCart },

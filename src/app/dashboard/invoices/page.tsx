@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { formatRupiah, formatDate, getStatusColor, getStatusLabel } from '@/lib/utils';
-import { Plus, X, Eye, FileText, CreditCard } from 'lucide-react';
+import { Plus, X, Eye, FileText, CreditCard, Download, FileSpreadsheet, Loader2, CalendarDays, Filter } from 'lucide-react';
 import { toast } from 'sonner';
+import { exportToPDF, exportToExcel } from '@/lib/export';
 
 interface Venue {
   id: string;
@@ -41,36 +43,62 @@ interface Invoice {
   pembayarans?: Pembayaran[];
 }
 
-export default function InvoicesPage() {
+function InvoicesPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterVenue, setFilterVenue] = useState('');
-  const [filterStatus, setFilterStatus] = useState('');
+  const [filterVenue, setFilterVenue] = useState(searchParams.get('venueId') || '');
+  const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || '');
+  const [dateFrom, setDateFrom] = useState(searchParams.get('from') || '');
+  const [dateTo, setDateTo] = useState(searchParams.get('to') || '');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ venueId: '', periodeMulai: '', periodeAkhir: '' });
   const [submitting, setSubmitting] = useState(false);
+  const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
 
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+
+  // Update URL params when filters change
+  const updateUrlParams = useCallback(
+    (venue: string, status: string, from: string, to: string) => {
+      const params = new URLSearchParams();
+      if (venue) params.set('venueId', venue);
+      if (status) params.set('status', status);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      const qs = params.toString();
+      router.push(`/dashboard/invoices${qs ? `?${qs}` : ''}`, { scroll: false });
+    },
+    [router]
+  );
 
   const fetchInvoices = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (filterVenue) params.set('venueId', filterVenue);
     if (filterStatus) params.set('status', filterStatus);
+    if (dateFrom) params.set('from', dateFrom);
+    if (dateTo) params.set('to', dateTo);
     fetch(`/api/invoices?${params.toString()}`)
       .then((r) => r.json())
       .then((d) => { if (d.success) setInvoices(d.data); })
       .catch(() => toast.error('Gagal memuat invoice'))
       .finally(() => setLoading(false));
-  }, [filterVenue, filterStatus]);
+  }, [filterVenue, filterStatus, dateFrom, dateTo]);
 
   useEffect(() => {
     fetch('/api/venues').then((r) => r.json()).then((d) => { if (d.success) setVenues(d.data); });
   }, []);
 
   useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
+
+  useEffect(() => {
+    updateUrlParams(filterVenue, filterStatus, dateFrom, dateTo);
+  }, [filterVenue, filterStatus, dateFrom, dateTo, updateUrlParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,6 +129,60 @@ export default function InvoicesPage() {
     }
   };
 
+  const handleExportPDF = async () => {
+    if (invoices.length === 0) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+    setExporting('pdf');
+    try {
+      const headers = ['No Invoice', 'Venue', 'Periode', 'Total Tagihan', 'Status', 'Jatuh Tempo'];
+      const data = invoices.map((inv) => [
+        inv.noInvoice,
+        inv.venue?.nama || '',
+        `${formatDate(inv.periodeMulai)} - ${formatDate(inv.periodeAkhir)}`,
+        inv.totalTagihan,
+        getStatusLabel(inv.status),
+        formatDate(inv.jatuhTempo),
+      ]);
+      const total = invoices.reduce((sum, inv) => sum + inv.totalTagihan, 0);
+      data.push(['', '', 'TOTAL', total, '', '']);
+      exportToPDF('Daftar Invoice', headers, data, `invoice-${new Date().toISOString().slice(0, 10)}`,
+        `Dicetak: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })} · ${invoices.length} invoice`);
+      toast.success('PDF berhasil diunduh');
+    } catch {
+      toast.error('Gagal mengekspor PDF');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportExcel = () => {
+    if (invoices.length === 0) {
+      toast.error('Tidak ada data untuk diekspor');
+      return;
+    }
+    setExporting('excel');
+    try {
+      const headers = ['No Invoice', 'Venue', 'Periode Mulai', 'Periode Akhir', 'Total Tagihan', 'Status', 'Jatuh Tempo'];
+      const data = invoices.map((inv) => [
+        inv.noInvoice,
+        inv.venue?.nama || '',
+        inv.periodeMulai,
+        inv.periodeAkhir,
+        inv.totalTagihan,
+        getStatusLabel(inv.status),
+        inv.jatuhTempo,
+      ]);
+      exportToExcel(headers, data, `invoice-${new Date().toISOString().slice(0, 10)}`);
+      toast.success('Excel berhasil diunduh');
+    } catch {
+      toast.error('Gagal mengekspor Excel');
+    } finally {
+      setExporting(null);
+    }
+  };
+
   const openDetail = async (invoice: Invoice) => {
     setDetailLoading(true);
     setSelectedInvoice(invoice);
@@ -117,31 +199,127 @@ export default function InvoicesPage() {
     }
   };
 
+  const clearFilter = (filter: string) => {
+    switch (filter) {
+      case 'venue': setFilterVenue(''); break;
+      case 'status': setFilterStatus(''); break;
+      case 'from': setDateFrom(''); break;
+      case 'to': setDateTo(''); break;
+    }
+  };
+
+  const clearAllFilters = () => {
+    setFilterVenue('');
+    setFilterStatus('');
+    setDateFrom('');
+    setDateTo('');
+  };
+
+  const hasActiveFilters = filterVenue || filterStatus || dateFrom || dateTo;
+
+  const activeFilters = [
+    filterVenue && { key: 'venue', label: `Venue: ${venues.find((v) => v.id === filterVenue)?.nama || filterVenue}` },
+    filterStatus && { key: 'status', label: `Status: ${getStatusLabel(filterStatus)}` },
+    dateFrom && { key: 'from', label: `Dari: ${formatDate(dateFrom)}` },
+    dateTo && { key: 'to', label: `Sampai: ${formatDate(dateTo)}` },
+  ].filter(Boolean) as { key: string; label: string }[];
+
   return (
     <DashboardLayout>
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Invoice</h3>
-          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Buat Invoice
-          </button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <button onClick={handleExportPDF} disabled={exporting === 'pdf'} className="btn-secondary flex items-center gap-2 text-sm">
+              {exporting === 'pdf' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+              Export PDF
+            </button>
+            <button onClick={handleExportExcel} disabled={exporting === 'excel'} className="btn-secondary flex items-center gap-2 text-sm">
+              {exporting === 'excel' ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
+              Export Excel
+            </button>
+            <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Buat Invoice
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <select value={filterVenue} onChange={(e) => setFilterVenue(e.target.value)} className="input-field max-w-xs">
-            <option value="">Semua Venue</option>
-            {venues.map((v) => (
-              <option key={v.id} value={v.id}>{v.nama}</option>
-            ))}
-          </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field max-w-xs">
-            <option value="">Semua Status</option>
-            <option value="BELUM_DIBAYAR">Belum Dibayar</option>
-            <option value="SUDAH_DIBAYAR">Sudah Dibayar</option>
-            <option value="TELAT">Telat</option>
-          </select>
+        <div className="card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+            <span className="text-sm font-medium text-[hsl(var(--foreground))]">Filter</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1 flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" /> Dari Tanggal
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="input-field w-full text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1 flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" /> Sampai Tanggal
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="input-field w-full text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">Venue</label>
+              <select value={filterVenue} onChange={(e) => setFilterVenue(e.target.value)} className="input-field w-full text-sm">
+                <option value="">Semua Venue</option>
+                {venues.map((v) => (
+                  <option key={v.id} value={v.id}>{v.nama}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">Status</label>
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="input-field w-full text-sm">
+                <option value="">Semua Status</option>
+                <option value="BELUM_DIBAYAR">Belum Dibayar</option>
+                <option value="SUDAH_DIBAYAR">Sudah Dibayar</option>
+                <option value="TELAT">Telat</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Active filters chips */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[hsl(var(--border))]">
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">Filter aktif:</span>
+              {activeFilters.map((f) => (
+                <span
+                  key={f.key}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))] border border-[hsl(var(--primary))]/20"
+                >
+                  {f.label}
+                  <button
+                    onClick={() => clearFilter(f.key)}
+                    className="ml-0.5 p-0.5 rounded-full hover:bg-[hsl(var(--primary))]/20 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={clearAllFilters}
+                className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline ml-1"
+              >
+                Hapus semua
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Create Invoice Modal */}
@@ -326,11 +504,21 @@ export default function InvoicesPage() {
               </tbody>
             </table>
             {invoices.length === 0 && (
-              <p className="text-center text-[hsl(var(--muted-text))] py-12">Belum ada invoice</p>
+              <p className="text-center text-[hsl(var(--muted-text))] py-12">
+                {hasActiveFilters ? 'Tidak ada invoice sesuai filter' : 'Belum ada invoice'}
+              </p>
             )}
           </div>
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div></div>}>
+      <InvoicesPageContent />
+    </Suspense>
   );
 }

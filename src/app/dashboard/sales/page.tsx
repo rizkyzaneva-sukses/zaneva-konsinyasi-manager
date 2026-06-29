@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { formatDate } from '@/lib/utils';
-import { ChevronLeft, ChevronRight, FileText, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FileText, Loader2, X, CalendarDays, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Sale {
@@ -29,10 +30,12 @@ interface Pagination {
   totalPages: number;
 }
 
-export default function SalesPage() {
+function SalesPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [sales, setSales] = useState<Sale[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [selectedVenue, setSelectedVenue] = useState('');
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
@@ -40,6 +43,26 @@ export default function SalesPage() {
     total: 0,
     totalPages: 0,
   });
+
+  // Filter state from URL params
+  const [selectedVenue, setSelectedVenue] = useState(searchParams.get('venueId') || '');
+  const [dateFrom, setDateFrom] = useState(searchParams.get('from') || '');
+  const [dateTo, setDateTo] = useState(searchParams.get('to') || '');
+  const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || '');
+
+  // Update URL params when filters change
+  const updateUrlParams = useCallback(
+    (venue: string, from: string, to: string, status: string) => {
+      const params = new URLSearchParams();
+      if (venue) params.set('venueId', venue);
+      if (from) params.set('from', from);
+      if (to) params.set('to', to);
+      if (status) params.set('status', status);
+      const qs = params.toString();
+      router.push(`/dashboard/sales${qs ? `?${qs}` : ''}`, { scroll: false });
+    },
+    [router]
+  );
 
   useEffect(() => {
     fetch('/api/venues')
@@ -56,6 +79,9 @@ export default function SalesPage() {
       try {
         const params = new URLSearchParams();
         if (selectedVenue) params.set('venueId', selectedVenue);
+        if (dateFrom) params.set('from', dateFrom);
+        if (dateTo) params.set('to', dateTo);
+        if (filterStatus) params.set('status', filterStatus);
         params.set('page', page.toString());
         params.set('limit', '50');
 
@@ -83,18 +109,55 @@ export default function SalesPage() {
         setLoading(false);
       }
     },
-    [selectedVenue]
+    [selectedVenue, dateFrom, dateTo, filterStatus]
   );
 
   useEffect(() => {
     fetchSales(1);
-  }, [fetchSales]);
+    updateUrlParams(selectedVenue, dateFrom, dateTo, filterStatus);
+  }, [fetchSales, selectedVenue, dateFrom, dateTo, filterStatus, updateUrlParams]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
       fetchSales(newPage);
     }
   };
+
+  const clearFilter = (filter: string) => {
+    switch (filter) {
+      case 'venue':
+        setSelectedVenue('');
+        break;
+      case 'from':
+        setDateFrom('');
+        break;
+      case 'to':
+        setDateTo('');
+        break;
+      case 'status':
+        setFilterStatus('');
+        break;
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSelectedVenue('');
+    setDateFrom('');
+    setDateTo('');
+    setFilterStatus('');
+  };
+
+  const hasActiveFilters = selectedVenue || dateFrom || dateTo || filterStatus;
+
+  const activeFilters = [
+    selectedVenue && {
+      key: 'venue',
+      label: `Venue: ${venues.find((v) => v.id === selectedVenue)?.nama || selectedVenue}`,
+    },
+    dateFrom && { key: 'from', label: `Dari: ${formatDate(dateFrom)}` },
+    dateTo && { key: 'to', label: `Sampai: ${formatDate(dateTo)}` },
+    filterStatus && { key: 'status', label: `Status: ${filterStatus}` },
+  ].filter(Boolean) as { key: string; label: string }[];
 
   const getPageNumbers = (): (number | '...')[] => {
     const { page, totalPages } = pagination;
@@ -130,21 +193,100 @@ export default function SalesPage() {
           </div>
         </div>
 
-        {/* Venue Filter */}
-        <div className="max-w-sm">
-          <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Filter Venue</label>
-          <select
-            value={selectedVenue}
-            onChange={(e) => setSelectedVenue(e.target.value)}
-            className="input-field"
-          >
-            <option value="">Semua Venue</option>
-            {venues.map((v) => (
-              <option key={v.id} value={v.id}>
-                {v.nama}
-              </option>
-            ))}
-          </select>
+        {/* Filters */}
+        <div className="card p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Filter className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
+            <span className="text-sm font-medium text-[hsl(var(--foreground))]">Filter</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* Date from */}
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1 flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" />
+                Dari Tanggal
+              </label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="input-field w-full text-sm"
+              />
+            </div>
+
+            {/* Date to */}
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1 flex items-center gap-1">
+                <CalendarDays className="w-3 h-3" />
+                Sampai Tanggal
+              </label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="input-field w-full text-sm"
+              />
+            </div>
+
+            {/* Venue filter */}
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">Venue</label>
+              <select
+                value={selectedVenue}
+                onChange={(e) => setSelectedVenue(e.target.value)}
+                className="input-field w-full text-sm"
+              >
+                <option value="">Semua Venue</option>
+                {venues.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.nama}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Status filter */}
+            <div>
+              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">Status</label>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="input-field w-full text-sm"
+              >
+                <option value="">Semua Status</option>
+                <option value="DROP_AWAL">Drop Awal</option>
+                <option value="RESTOCK">Restock</option>
+                <option value="PENARIKAN">Penarikan</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Active filters chips */}
+          {hasActiveFilters && (
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-[hsl(var(--border))]">
+              <span className="text-xs text-[hsl(var(--muted-foreground))]">Filter aktif:</span>
+              {activeFilters.map((f) => (
+                <span
+                  key={f.key}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[hsl(var(--primary))]/10 text-[hsl(var(--primary))] border border-[hsl(var(--primary))]/20"
+                >
+                  {f.label}
+                  <button
+                    onClick={() => clearFilter(f.key)}
+                    className="ml-0.5 p-0.5 rounded-full hover:bg-[hsl(var(--primary))]/20 transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+              <button
+                onClick={clearAllFilters}
+                className="text-xs text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] underline ml-1"
+              >
+                Hapus semua
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Table */}
@@ -171,7 +313,9 @@ export default function SalesPage() {
                     {sales.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
-                          Belum ada data penjualan
+                          {hasActiveFilters
+                            ? 'Tidak ada data sesuai filter'
+                            : 'Belum ada data penjualan'}
                         </td>
                       </tr>
                     ) : (
@@ -256,5 +400,13 @@ export default function SalesPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function SalesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[hsl(var(--primary))]"></div></div>}>
+      <SalesPageContent />
+    </Suspense>
   );
 }
