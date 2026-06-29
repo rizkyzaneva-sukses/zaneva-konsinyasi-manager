@@ -100,6 +100,11 @@ Jalankan reset hanya setelah yakin data trial boleh dikosongkan.
    - `DATABASE_URL` = connection string dari PostgreSQL
    - `SESSION_SECRET` = random string min 32 karakter
    - `N8N_WEBHOOK_URL` = URL webhook n8n (opsional)
+   - `WAHA_API_URL` = URL WAHA, contoh `http://waha:3000`
+   - `WAHA_API_KEY` = API key WAHA jika diaktifkan
+   - `WAHA_SESSION` = nama session WAHA, default `default`
+   - `WAHA_WEBHOOK_SECRET` = secret webhook inbound WAHA
+   - `WAHA_OWNER_NUMBERS` = nomor WA owner dipisah koma, contoh `62812xxxx,62813xxxx`
    - `NEXT_PUBLIC_APP_URL` = URL app
 7. Deploy!
 
@@ -129,6 +134,12 @@ Rekomendasi integrasi WAHA:
 - Kirim alert stok rendah berdasarkan ROP per venue-produk.
 - Broadcast pengumuman bisa pilih semua venue atau sebagian venue.
 
+Endpoint inbound WAHA di app:
+
+- `POST /api/waha/webhook`
+- Jika `WAHA_WEBHOOK_SECRET` diisi, pasang URL webhook dengan query `?secret=...` atau header secret.
+- App membalas via WAHA `POST /api/sendText`.
+
 Untuk chat masuk dari venue, gunakan command terbatas, bukan AI bebas:
 
 - `STOK` → balas ringkasan stok venue dari nomor WA yang terdaftar.
@@ -136,6 +147,14 @@ Untuk chat masuk dari venue, gunakan command terbatas, bukan AI bebas:
 - `INVOICE` → balas invoice belum lunas milik venue tersebut.
 - `INVOICE <NO_INVOICE>` → balas detail invoice tertentu.
 - `HELP` → balas daftar format yang didukung.
+
+Untuk owner, nomor harus masuk `WAHA_OWNER_NUMBERS`, lalu command bisa eksekusi langsung:
+
+- `STOK <nama venue>` → cek stok venue.
+- `INVOICE <nama venue>` → cek invoice belum lunas venue.
+- `BROADCAST ALL | pesan` → kirim pesan ke semua venue aktif.
+- `BROADCAST Venue A, Venue B | pesan` → kirim pesan ke sebagian venue.
+- `HELP` → balas daftar format owner.
 
 Jika pesan tidak cocok format, bot cukup balas contoh format. Jangan biarkan AI menjawab di luar ruang lingkup stok/invoice.
 

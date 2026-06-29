@@ -419,10 +419,11 @@ export default function PanduanPage() {
                 <Step num={1} title="Notifikasi Invoice" desc="Kirim invoice terbit, reminder jatuh tempo, dan konfirmasi pembayaran approved ke nomor PIC venue." />
                 <Step num={2} title="Alert Stok Rendah" desc="Kirim alert ke internal saat stok venue menyentuh ROP masing-masing produk." />
                 <Step num={3} title="Command Venue" desc="Batasi command ke STOK, STOK SKU, INVOICE, INVOICE NOMOR, dan HELP." />
-                <Step num={4} title="Broadcast Terarah" desc="Owner/Admin bisa kirim pengumuman ke semua venue atau pilih sebagian venue." />
+                <Step num={4} title="Command Owner" desc="Nomor owner dari WAHA_OWNER_NUMBERS bisa eksekusi STOK venue, INVOICE venue, BROADCAST ALL, atau BROADCAST beberapa venue." />
+                <Step num={5} title="Endpoint Webhook" desc="Arahkan WAHA message webhook ke /api/waha/webhook dan isi WAHA_API_URL agar app bisa membalas otomatis." />
               </Steps>
               <TipBox type="warning">
-                Jangan pakai AI bebas untuk menjawab semua chat WA. Gunakan allowlist format agar bot tidak jawab keluar konteks.
+                Jangan pakai AI bebas untuk menjawab semua chat WA. Command yang tidak cocok format hanya dibalas HELP.
               </TipBox>
             </GuideSection>
 
