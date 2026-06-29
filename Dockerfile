@@ -38,7 +38,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Needed to run `prisma db push` / seed from the runtime container
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+# Install seed dependencies for runtime
+USER root
+RUN npm install --no-save bcryptjs prisma tsx 2>/dev/null || true
+RUN npx prisma generate 2>/dev/null || true
+USER nextjs
 
 EXPOSE 3000
 
