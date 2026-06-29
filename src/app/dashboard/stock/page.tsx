@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { getStatusLabel } from '@/lib/utils';
 import { stokMasukSchema } from '@/lib/validations';
 import { Plus, X, Loader2, Package, Copy, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +13,7 @@ interface StockItem {
   kategori: string;
   hargaJual: number;
   totalMasuk: number;
+  totalPenarikan: number;
   totalTerjual: number;
   totalRetur: number;
   sisaStok: number;
@@ -338,6 +338,7 @@ export default function StockPage() {
                     <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Produk</th>
                     <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">SKU</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Masuk</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Penarikan</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Terjual</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Retur</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Sisa Stok</th>
@@ -346,7 +347,7 @@ export default function StockPage() {
                 <tbody>
                   {stock.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+                      <td colSpan={7} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
                         Belum ada data stok untuk venue ini
                       </td>
                     </tr>
@@ -359,6 +360,7 @@ export default function StockPage() {
                         </td>
                         <td className="py-3 px-4 text-[hsl(var(--muted-foreground))] font-mono">{s.sku}</td>
                         <td className="py-3 px-4 text-right text-blue-500 font-medium">{s.totalMasuk}</td>
+                        <td className="py-3 px-4 text-right text-red-500 font-medium">{s.totalPenarikan}</td>
                         <td className="py-3 px-4 text-right text-green-500 font-medium">{s.totalTerjual}</td>
                         <td className="py-3 px-4 text-right text-amber-500 font-medium">{s.totalRetur}</td>
                         <td className="py-3 px-4 text-right">

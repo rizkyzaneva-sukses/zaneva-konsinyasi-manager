@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/session';
 import { returSchema } from '@/lib/validations';
 import { createAuditLog } from '@/lib/audit';
 import { sendWebhook } from '@/lib/webhook';
+import { calculateStok } from '@/lib/stock';
 
 export async function GET(request: NextRequest) {
   try {
@@ -38,6 +39,15 @@ export async function POST(request: NextRequest) {
     const session = await requireRole('ADMIN', 'STAFF');
     const body = await request.json();
     const data = returSchema.parse(body);
+
+    const stok = await calculateStok(data.venueId, data.produkId);
+    if (stok < data.qty) {
+      const produk = await prisma.produk.findUnique({ where: { id: data.produkId } });
+      return NextResponse.json(
+        { success: false, error: `Stok ${produk?.nama || 'produk'} tidak cukup. Sisa stok: ${stok}` },
+        { status: 400 }
+      );
+    }
 
     const retur = await prisma.returBarang.create({
       data: {

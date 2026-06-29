@@ -48,16 +48,14 @@ function SalesPageContent() {
   const [selectedVenue, setSelectedVenue] = useState(searchParams.get('venueId') || '');
   const [dateFrom, setDateFrom] = useState(searchParams.get('from') || '');
   const [dateTo, setDateTo] = useState(searchParams.get('to') || '');
-  const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || '');
 
   // Update URL params when filters change
   const updateUrlParams = useCallback(
-    (venue: string, from: string, to: string, status: string) => {
+    (venue: string, from: string, to: string) => {
       const params = new URLSearchParams();
       if (venue) params.set('venueId', venue);
       if (from) params.set('from', from);
       if (to) params.set('to', to);
-      if (status) params.set('status', status);
       const qs = params.toString();
       router.push(`/dashboard/sales${qs ? `?${qs}` : ''}`, { scroll: false });
     },
@@ -81,7 +79,6 @@ function SalesPageContent() {
         if (selectedVenue) params.set('venueId', selectedVenue);
         if (dateFrom) params.set('from', dateFrom);
         if (dateTo) params.set('to', dateTo);
-        if (filterStatus) params.set('status', filterStatus);
         params.set('page', page.toString());
         params.set('limit', '50');
 
@@ -109,13 +106,13 @@ function SalesPageContent() {
         setLoading(false);
       }
     },
-    [selectedVenue, dateFrom, dateTo, filterStatus]
+    [selectedVenue, dateFrom, dateTo]
   );
 
   useEffect(() => {
     fetchSales(1);
-    updateUrlParams(selectedVenue, dateFrom, dateTo, filterStatus);
-  }, [fetchSales, selectedVenue, dateFrom, dateTo, filterStatus, updateUrlParams]);
+    updateUrlParams(selectedVenue, dateFrom, dateTo);
+  }, [fetchSales, selectedVenue, dateFrom, dateTo, updateUrlParams]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= pagination.totalPages) {
@@ -134,9 +131,6 @@ function SalesPageContent() {
       case 'to':
         setDateTo('');
         break;
-      case 'status':
-        setFilterStatus('');
-        break;
     }
   };
 
@@ -144,10 +138,9 @@ function SalesPageContent() {
     setSelectedVenue('');
     setDateFrom('');
     setDateTo('');
-    setFilterStatus('');
   };
 
-  const hasActiveFilters = selectedVenue || dateFrom || dateTo || filterStatus;
+  const hasActiveFilters = selectedVenue || dateFrom || dateTo;
 
   const activeFilters = [
     selectedVenue && {
@@ -156,7 +149,6 @@ function SalesPageContent() {
     },
     dateFrom && { key: 'from', label: `Dari: ${formatDate(dateFrom)}` },
     dateTo && { key: 'to', label: `Sampai: ${formatDate(dateTo)}` },
-    filterStatus && { key: 'status', label: `Status: ${filterStatus}` },
   ].filter(Boolean) as { key: string; label: string }[];
 
   const getPageNumbers = (): (number | '...')[] => {
@@ -199,7 +191,7 @@ function SalesPageContent() {
             <Filter className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
             <span className="text-sm font-medium text-[hsl(var(--foreground))]">Filter</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* Date from */}
             <div>
               <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1 flex items-center gap-1">
@@ -242,21 +234,6 @@ function SalesPageContent() {
                     {v.nama}
                   </option>
                 ))}
-              </select>
-            </div>
-
-            {/* Status filter */}
-            <div>
-              <label className="block text-xs font-medium text-[hsl(var(--muted-foreground))] mb-1">Status</label>
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="input-field w-full text-sm"
-              >
-                <option value="">Semua Status</option>
-                <option value="DROP_AWAL">Drop Awal</option>
-                <option value="RESTOCK">Restock</option>
-                <option value="PENARIKAN">Penarikan</option>
               </select>
             </div>
           </div>

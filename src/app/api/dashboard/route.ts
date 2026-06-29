@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/session';
 import type { DashboardStats } from '@/types';
+import { getVenueStock } from '@/lib/stock';
 
 export async function GET() {
   try {
-    const session = await requireRole('ADMIN', 'STAFF');
+    await requireRole('ADMIN', 'STAFF');
 
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -41,32 +42,15 @@ export async function GET() {
     const stokRendah: DashboardStats['stokRendah'] = [];
 
     for (const venue of venues) {
-      const stokMasuk = await prisma.stokMasuk.groupBy({
-        by: ['produkId'],
-        where: { venueId: venue.id },
-        _sum: { qty: true },
-      });
+      const stockRows = await getVenueStock(venue.id);
 
-      const terjual = await prisma.laporanPenjualan.groupBy({
-        by: ['produkId'],
-        where: { venueId: venue.id },
-        _sum: { qtyTerjual: true },
-      });
-
-      const masukMap = new Map(stokMasuk.map((s: { produkId: string; _sum: { qty: number | null } }) => [s.produkId, s._sum.qty || 0]));
-      const terjualMap = new Map(terjual.map((t: { produkId: string; _sum: { qtyTerjual: number | null } }) => [t.produkId, t._sum.qtyTerjual || 0]));
-
-      for (const [produkId, masuk] of masukMap) {
-        const sisa = (masuk as number) - (terjualMap.get(produkId) || 0);
-        if (sisa <= 5) {
-          const produk = await prisma.produk.findUnique({ where: { id: produkId } });
-          if (produk) {
-            stokRendah.push({
-              venueNama: venue.nama,
-              produkNama: produk.nama,
-              sisaStok: sisa,
-            });
-          }
+      for (const row of stockRows) {
+        if (row.sisaStok <= 5) {
+          stokRendah.push({
+            venueNama: venue.nama,
+            produkNama: row.produkNama,
+            sisaStok: row.sisaStok,
+          });
         }
       }
     }

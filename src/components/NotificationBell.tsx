@@ -72,9 +72,9 @@ export function NotificationBell() {
     async function fetchNotifications() {
       setLoading(true);
       try {
-        const [invoicesRes, stockRes] = await Promise.all([
+        const [invoicesRes, venuesRes] = await Promise.all([
           fetch('/api/invoices?status=BELUM_DIBAYAR'),
-          fetch('/api/stock'),
+          fetch('/api/venues'),
         ]);
 
         const notifs: Notification[] = [];
@@ -112,20 +112,32 @@ export function NotificationBell() {
           }
         }
 
-        // Check low stock
-        if (stockRes.ok) {
-          const stockData = await stockRes.json();
-          if (stockData.success && stockData.data) {
-            stockData.data.forEach((item: { produkId: string; produkNama?: string; venueNama?: string; sisa: number }) => {
-              if (item.sisa < 5 && item.sisa > 0) {
-                notifs.push({
-                  id: `lowstock-${item.produkId}-${item.venueNama}`,
-                  type: 'low_stock',
-                  title: 'Stok Rendah',
-                  message: `${item.produkNama || 'Produk'} di ${item.venueNama || 'Venue'} sisa ${item.sisa}`,
-                  link: '/dashboard/stock',
-                  icon: 'alert',
-                  timestamp: now.toISOString(),
+        // Check low stock per venue. Admin/staff stock API requires venueId.
+        if (venuesRes.ok) {
+          const venuesData = await venuesRes.json();
+          if (venuesData.success && venuesData.data) {
+            const stockResponses = await Promise.all(
+              venuesData.data.map((venue: { id: string; nama: string }) =>
+                fetch(`/api/stock?venueId=${venue.id}`)
+                  .then((res) => res.ok ? res.json() : null)
+                  .then((data) => ({ venue, data }))
+              )
+            );
+
+            stockResponses.forEach(({ venue, data }) => {
+              if (data?.success && data.data) {
+                data.data.forEach((item: { produkId: string; produkNama?: string; sisaStok: number }) => {
+                  if (item.sisaStok < 5 && item.sisaStok > 0) {
+                    notifs.push({
+                      id: `lowstock-${item.produkId}-${venue.id}`,
+                      type: 'low_stock',
+                      title: 'Stok Rendah',
+                      message: `${item.produkNama || 'Produk'} di ${venue.nama} sisa ${item.sisaStok}`,
+                      link: '/dashboard/stock',
+                      icon: 'alert',
+                      timestamp: now.toISOString(),
+                    });
+                  }
                 });
               }
             });

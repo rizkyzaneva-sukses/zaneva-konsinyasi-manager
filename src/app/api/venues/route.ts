@@ -6,7 +6,7 @@ import { createAuditLog } from '@/lib/audit';
 
 export async function GET() {
   try {
-    const session = await requireRole('ADMIN', 'STAFF');
+    await requireRole('ADMIN', 'STAFF');
 
     const venues = await prisma.venue.findMany({
       orderBy: { createdAt: 'desc' },

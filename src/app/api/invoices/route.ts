@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { requireRole } from '@/lib/session';
 import { createAuditLog } from '@/lib/audit';
 import { sendWebhook } from '@/lib/webhook';
+import { generateInvoiceNumber, presentInvoice } from '@/lib/invoice';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +11,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const venueId = searchParams.get('venueId');
     const status = searchParams.get('status');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
 
     const where: Record<string, unknown> = {};
     if (session.role === 'VENUE') {
@@ -19,6 +22,16 @@ export async function GET(request: NextRequest) {
     }
     if (status) {
       where.status = status;
+    }
+    if (from || to) {
+      const createdAt: { gte?: Date; lte?: Date } = {};
+      if (from) createdAt.gte = new Date(from);
+      if (to) {
+        const end = new Date(to);
+        end.setHours(23, 59, 59, 999);
+        createdAt.lte = end;
+      }
+      where.createdAt = createdAt;
     }
 
     const invoices = await prisma.invoice.findMany({
@@ -31,7 +44,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ success: true, data: invoices });
+    return NextResponse.json({ success: true, data: invoices.map(presentInvoice) });
   } catch (error) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
@@ -57,6 +70,21 @@ export async function POST(request: NextRequest) {
 
     if (!venue) {
       return NextResponse.json({ success: false, error: 'Venue tidak ditemukan' }, { status: 404 });
+    }
+
+    const existingInvoice = await prisma.invoice.findFirst({
+      where: {
+        venueId,
+        periodeMulai: new Date(periodeMulai),
+        periodeAkhir: new Date(periodeAkhir),
+      },
+    });
+
+    if (existingInvoice) {
+      return NextResponse.json(
+        { success: false, error: 'Invoice untuk venue dan periode ini sudah pernah dibuat' },
+        { status: 409 }
+      );
     }
 
     // Get sales data for the period
@@ -112,6 +140,7 @@ export async function POST(request: NextRequest) {
     // Create invoice with items
     const invoice = await prisma.invoice.create({
       data: {
+        noInvoice: await generateInvoiceNumber(),
         venueId,
         periodeMulai: new Date(periodeMulai),
         periodeAkhir: new Date(periodeAkhir),
@@ -144,7 +173,7 @@ export async function POST(request: NextRequest) {
       jatuhTempo: jatuhTempo.toISOString(),
     });
 
-    return NextResponse.json({ success: true, data: invoice }, { status: 201 });
+    return NextResponse.json({ success: true, data: presentInvoice(invoice) }, { status: 201 });
   } catch (error) {
     if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });

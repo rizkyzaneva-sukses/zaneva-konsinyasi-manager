@@ -6,7 +6,7 @@ import { createAuditLog } from '@/lib/audit';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await requireRole('ADMIN', 'STAFF');
+    await requireRole('ADMIN', 'STAFF');
     const { id } = await params;
 
     const venue = await prisma.venue.findUnique({

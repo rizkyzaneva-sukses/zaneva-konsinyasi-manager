@@ -135,6 +135,7 @@ model LaporanPenjualan {
 
 model Invoice {
   id            String        @id @default(uuid()) @db.Uuid
+  noInvoice     String?       @unique
   venueId       String        @db.Uuid
   periodeMulai  DateTime      @db.Date
   periodeAkhir  DateTime      @db.Date
@@ -152,6 +153,7 @@ model Invoice {
   @@index([venueId])
   @@index([status])
   @@index([jatuhTempo])
+  @@index([periodeMulai, periodeAkhir])
 }
 
 model InvoiceItem {

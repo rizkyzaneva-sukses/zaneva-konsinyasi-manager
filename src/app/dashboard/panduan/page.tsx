@@ -5,8 +5,8 @@ import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import {
   BookOpen, Building2, Package, Truck, ShoppingCart,
   FileText, CreditCard, RotateCcw, ClipboardList,
-  ChevronDown, ChevronRight, ArrowRight, Zap, Users,
-  HelpCircle, CheckCircle2, AlertTriangle, Info,
+  ChevronDown, ChevronRight, ArrowRight, Zap,
+  HelpCircle, CheckCircle2, AlertTriangle, Info, Shield,
 } from 'lucide-react';
 
 type Role = 'ADMIN' | 'STAFF' | 'VENUE';
@@ -242,6 +242,25 @@ export default function PanduanPage() {
               🔧 Panduan Tim (Admin & Staff)
             </h2>
 
+            <GuideSection
+              icon={Shield}
+              title="Role Tim: Owner & Staff Operasional"
+              color="#0ea5e9"
+              defaultOpen={role === 'ADMIN'}
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                Di sistem ini akun ADMIN dipakai sebagai Owner, sedangkan STAFF dipakai untuk operasional harian.
+              </p>
+              <Steps>
+                <Step num={1} title="Owner / ADMIN" desc="Akses penuh: kelola user, venue, produk, margin, invoice, pembayaran, audit, dan laporan." />
+                <Step num={2} title="Staff Operasional" desc="Fokus input harian: stok, penjualan, retur, draft invoice, pembayaran, export laporan, dan monitoring venue." />
+                <Step num={3} title="Batas Staff" desc="Staff tidak mengelola user, tidak mengubah margin/harga sensitif, dan tidak menghapus data penting permanen." />
+              </Steps>
+              <TipBox type="info">
+                Role VENUE adalah akun partner/venue eksternal, bukan bagian dari 2 role internal tim.
+              </TipBox>
+            </GuideSection>
+
             {/* Alur Konsinyasi */}
             <GuideSection
               icon={Zap}
@@ -323,11 +342,11 @@ export default function PanduanPage() {
               <Steps>
                 <Step num={1} title="Drop Awal" desc="Kirim stok pertama kali ke venue baru. Pilih venue → tambahkan produk & qty → submit." />
                 <Step num={2} title="Restock" desc="Isi ulang stok venue yang sudah berjalan. Sistem akan menambah qty yang ada." />
-                <Step num={3} title="Penarikan" desc="Tarik stok dari venue (misal produk tidak laku). Stok dikembalikan ke gudang." />
+                <Step num={3} title="Penarikan" desc="Tarik stok dari venue (misal produk tidak laku). Sistem mengurangi saldo stok venue dan mencatatnya sebagai movement penarikan." />
                 <Step num={4} title="Bulk Assign" desc="Untuk distribusi ke banyak venue sekaligas, gunakan tombol 'Bulk Assign'." />
               </Steps>
               <TipBox type="info">
-                Stok venue otomatis berkurang setiap ada penjualan. Cek menu Stok untuk melihat stok real-time.
+                Stok real-time dihitung dari drop/restock dikurangi penarikan, penjualan, dan retur.
               </TipBox>
             </GuideSection>
 
@@ -341,10 +360,10 @@ export default function PanduanPage() {
                 Membuat tagihan dan mencatat pembayaran dari venue.
               </p>
               <Steps>
-                <Step num={1} title="Buat Invoice" desc="Buka menu Invoice → 'Buat Invoice'. Pilih venue dan periode. Sistem hitung total otomatis dari data penjualan." />
+                <Step num={1} title="Buat Invoice" desc="Buka menu Invoice → 'Buat Invoice'. Pilih venue dan periode. Sistem memberi nomor invoice otomatis dan menolak periode yang sudah pernah ditagih." />
                 <Step num={2} title="Kirim ke Venue" desc="Export invoice ke PDF dan kirim ke venue via WhatsApp/email." />
                 <Step num={3} title="Catat Pembayaran" desc="Saat venue bayar, buka menu Pembayaran → catat jumlah dan metode bayar." />
-                <Step num={4} title="Verifikasi" desc="Invoice otomatis berubah status: Unpaid → Partial → Paid." />
+                <Step num={4} title="Verifikasi" desc="Invoice otomatis berubah status menjadi lunas saat total pembayaran sudah sama dengan total tagihan." />
               </Steps>
               <TipBox type="tip">
                 Invoice yang jatuh tempo akan muncul sebagai notifikasi di bell icon.
@@ -363,7 +382,7 @@ export default function PanduanPage() {
               <Steps>
                 <Step num={1} title="Terima Pengajuan" desc="Venue mengajukan retur dari aplikasi mereka. Cek di menu Retur." />
                 <Step num={2} title="Verifikasi" desc="Periksa kondisi produk. Setujui atau tolak retur." />
-                <Step num={3} title="Stok Otomatis" desc="Retur yang disetujui otomatis menambah stok gudang dan mengurangi stok venue." />
+                <Step num={3} title="Stok Otomatis" desc="Retur hanya bisa dicatat jika stok venue cukup, lalu otomatis mengurangi saldo stok venue." />
               </Steps>
             </GuideSection>
 

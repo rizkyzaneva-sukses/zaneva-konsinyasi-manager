@@ -48,9 +48,24 @@ docker compose exec app npx tsx prisma/seed.ts
 
 | Role   | Username | Password  |
 |--------|----------|-----------|
-| Admin  | admin    | admin123  |
-| Staff  | staff    | staff123  |
+| Owner/Admin | admin | admin123 |
+| Staff Operasional | staff | staff123 |
 | Venue  | venue1   | venue123  |
+
+> Ganti semua password seed sebelum production.
+
+## Role Tim
+
+- **Owner/Admin**: akses penuh untuk user, venue, produk, margin, invoice, pembayaran, audit, dan laporan.
+- **Staff Operasional**: menjalankan pekerjaan harian seperti input stok, penjualan, retur, draft invoice, catat pembayaran, export laporan, dan monitoring venue.
+- **Venue**: akun partner eksternal untuk input penjualan/retur dan melihat riwayat venue sendiri.
+
+## Catatan Alur Data
+
+- Stok venue dihitung dari `DROP_AWAL + RESTOCK - PENARIKAN - PENJUALAN - RETUR`.
+- Invoice punya nomor otomatis `ZKM-YYYY-0001`.
+- Sistem menolak invoice dobel untuk venue dan periode yang sama.
+- Pembayaran dicatat melalui transaction agar status invoice dan payment tidak mudah tidak sinkron.
 
 ## Deploy ke EasyPanel
 

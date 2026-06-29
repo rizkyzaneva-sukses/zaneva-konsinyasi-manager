@@ -4,7 +4,7 @@ import { requireRole } from '@/lib/session';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await requireRole('ADMIN', 'STAFF');
+    await requireRole('ADMIN', 'STAFF');
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');

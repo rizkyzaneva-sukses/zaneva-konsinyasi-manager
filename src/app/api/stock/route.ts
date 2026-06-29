@@ -4,6 +4,7 @@ import { requireRole } from '@/lib/session';
 import { stokMasukSchema } from '@/lib/validations';
 import { createAuditLog } from '@/lib/audit';
 import { sendWebhook } from '@/lib/webhook';
+import { calculateStok, getVenueStock } from '@/lib/stock';
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,66 +19,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'venueId wajib' }, { status: 400 });
     }
 
-    // Calculate stock: masuk - terjual - retur
-    const [stokMasuk, laporanPenjualan, returBarang] = await Promise.all([
-      prisma.stokMasuk.groupBy({
-        by: ['produkId'],
-        where: { venueId: targetVenueId },
-        _sum: { qty: true },
-      }),
-      prisma.laporanPenjualan.groupBy({
-        by: ['produkId'],
-        where: { venueId: targetVenueId },
-        _sum: { qtyTerjual: true, qtyRetur: true },
-      }),
-      prisma.returBarang.groupBy({
-        by: ['produkId'],
-        where: { venueId: targetVenueId },
-        _sum: { qty: true },
-      }),
-    ]);
-
-    const produks = await prisma.produk.findMany({
-      where: { aktif: true },
-      orderBy: { nama: 'asc' },
-    });
-
-    const stokMap = new Map<string, number>();
-
-    for (const s of stokMasuk) {
-      stokMap.set(s.produkId, (stokMap.get(s.produkId) || 0) + (s._sum.qty || 0));
-    }
-
-    const terjualMap = new Map<string, number>();
-    const returVenueMap = new Map<string, number>();
-
-    for (const l of laporanPenjualan) {
-      terjualMap.set(l.produkId, (terjualMap.get(l.produkId) || 0) + (l._sum.qtyTerjual || 0));
-      returVenueMap.set(l.produkId, (returVenueMap.get(l.produkId) || 0) + (l._sum.qtyRetur || 0));
-    }
-
-    for (const r of returBarang) {
-      returVenueMap.set(r.produkId, (returVenueMap.get(r.produkId) || 0) + (r._sum.qty || 0));
-    }
-
-    const result = produks.map((p: { id: string; nama: string; sku: string; kategori: string; hargaJual: number }) => {
-      const masuk = stokMap.get(p.id) || 0;
-      const terjual = terjualMap.get(p.id) || 0;
-      const retur = returVenueMap.get(p.id) || 0;
-      const sisa = masuk - terjual - retur;
-
-      return {
-        produkId: p.id,
-        produkNama: p.nama,
-        sku: p.sku,
-        kategori: p.kategori,
-        hargaJual: p.hargaJual,
-        totalMasuk: masuk,
-        totalTerjual: terjual,
-        totalRetur: retur,
-        sisaStok: sisa,
-      };
-    });
+    const result = await getVenueStock(targetVenueId);
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
@@ -94,7 +36,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = stokMasukSchema.parse(body);
 
-    // PENARIKAN reduces stock, validate enough stock
+    // PENARIKAN reduces venue stock, validate enough stock before recording movement.
     if (data.jenis === 'PENARIKAN') {
       const stok = await calculateStok(data.venueId, data.produkId);
       if (stok < data.qty) {
@@ -151,32 +93,4 @@ export async function POST(request: NextRequest) {
     }
     return NextResponse.json({ success: false, error: 'Terjadi kesalahan' }, { status: 500 });
   }
-}
-
-async function calculateStok(venueId: string, produkId: string): Promise<number> {
-  const [masuk, terjual, returVenue, returBarang] = await Promise.all([
-    prisma.stokMasuk.aggregate({
-      where: { venueId, produkId },
-      _sum: { qty: true },
-    }),
-    prisma.laporanPenjualan.aggregate({
-      where: { venueId, produkId },
-      _sum: { qtyTerjual: true },
-    }),
-    prisma.laporanPenjualan.aggregate({
-      where: { venueId, produkId },
-      _sum: { qtyRetur: true },
-    }),
-    prisma.returBarang.aggregate({
-      where: { venueId, produkId },
-      _sum: { qty: true },
-    }),
-  ]);
-
-  return (
-    (masuk._sum.qty || 0) -
-    (terjual._sum.qtyTerjual || 0) -
-    (returVenue._sum.qtyRetur || 0) -
-    (returBarang._sum.qty || 0)
-  );
 }

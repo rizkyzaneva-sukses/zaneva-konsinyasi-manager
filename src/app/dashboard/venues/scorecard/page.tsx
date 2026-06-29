@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { formatRupiah } from '@/lib/utils';
 import {
   Trophy,
   TrendingUp,

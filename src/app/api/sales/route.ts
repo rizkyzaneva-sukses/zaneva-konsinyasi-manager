@@ -4,18 +4,34 @@ import { requireRole } from '@/lib/session';
 import { laporanPenjualanSchema } from '@/lib/validations';
 import { createAuditLog } from '@/lib/audit';
 import { sendWebhook } from '@/lib/webhook';
+import { calculateStok } from '@/lib/stock';
 
 export async function GET(request: NextRequest) {
   try {
     const session = await requireRole('ADMIN', 'STAFF', 'VENUE');
     const { searchParams } = new URL(request.url);
     const venueId = searchParams.get('venueId');
+    const from = searchParams.get('from');
+    const to = searchParams.get('to');
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
 
-    const where = session.role === 'VENUE'
+    const where: {
+      venueId?: string;
+      tanggal?: { gte?: Date; lte?: Date };
+    } = session.role === 'VENUE'
       ? { venueId: session.venueId! }
       : venueId ? { venueId } : {};
+
+    if (from || to) {
+      where.tanggal = {};
+      if (from) where.tanggal.gte = new Date(from);
+      if (to) {
+        const end = new Date(to);
+        end.setHours(23, 59, 59, 999);
+        where.tanggal.lte = end;
+      }
+    }
 
     const [data, total] = await Promise.all([
       prisma.laporanPenjualan.findMany({
@@ -24,7 +40,7 @@ export async function GET(request: NextRequest) {
         skip: (page - 1) * limit,
         take: limit,
         include: {
-          produk: { select: { nama: true, sku: true } },
+          produk: { select: { nama: true, sku: true, hargaJual: true } },
           venue: { select: { nama: true } },
           user: { select: { nama: true } },
         },
@@ -32,9 +48,14 @@ export async function GET(request: NextRequest) {
       prisma.laporanPenjualan.count({ where }),
     ]);
 
+    const enrichedData = data.map((item) => ({
+      ...item,
+      totalHarga: item.qtyTerjual * item.produk.hargaJual,
+    }));
+
     return NextResponse.json({
       success: true,
-      data,
+      data: enrichedData,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     });
   } catch (error) {
@@ -114,20 +135,4 @@ export async function POST(request: NextRequest) {
     console.error('POST sales error:', error);
     return NextResponse.json({ success: false, error: 'Terjadi kesalahan' }, { status: 500 });
   }
-}
-
-async function calculateStok(venueId: string, produkId: string): Promise<number> {
-  const [masuk, terjual, returVenue, returBarang] = await Promise.all([
-    prisma.stokMasuk.aggregate({ where: { venueId, produkId }, _sum: { qty: true } }),
-    prisma.laporanPenjualan.aggregate({ where: { venueId, produkId }, _sum: { qtyTerjual: true } }),
-    prisma.laporanPenjualan.aggregate({ where: { venueId, produkId }, _sum: { qtyRetur: true } }),
-    prisma.returBarang.aggregate({ where: { venueId, produkId }, _sum: { qty: true } }),
-  ]);
-
-  return (
-    (masuk._sum.qty || 0) -
-    (terjual._sum.qtyTerjual || 0) -
-    (returVenue._sum.qtyRetur || 0) -
-    (returBarang._sum.qty || 0)
-  );
 }

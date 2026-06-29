@@ -1,6 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+
+type ExportCell = string | number | boolean | Date | null | undefined;
 
 function formatRupiahPlain(amount: number): string {
   return new Intl.NumberFormat('id-ID', {
@@ -11,10 +12,20 @@ function formatRupiahPlain(amount: number): string {
   }).format(amount);
 }
 
+function normalizeRows(data: ExportCell[][]): (string | number | boolean)[][] {
+  return data.map((row) =>
+    row.map((cell) => {
+      if (cell === null || cell === undefined) return '';
+      if (cell instanceof Date) return cell.toISOString();
+      return cell;
+    })
+  );
+}
+
 export function exportToPDF(
   title: string,
   headers: string[],
-  data: any[][],
+  data: ExportCell[][],
   filename: string,
   subtitle?: string
 ) {
@@ -43,7 +54,7 @@ export function exportToPDF(
   // Table
   autoTable(doc, {
     head: [headers],
-    body: data,
+    body: normalizeRows(data),
     startY: subtitle ? 50 : 45,
     styles: {
       fontSize: 8,
@@ -84,25 +95,25 @@ export function exportToPDF(
 
 export function exportToExcel(
   headers: string[],
-  data: any[][],
+  data: ExportCell[][],
   filename: string
 ) {
-  const wb = XLSX.utils.book_new();
-  const wsData = [headers, ...data];
-  const ws = XLSX.utils.aoa_to_sheet(wsData);
-
-  // Auto-width columns
-  const colWidths = headers.map((h, i) => {
-    const maxLen = Math.max(
-      h.length,
-      ...data.map((row) => String(row[i] ?? '').length)
-    );
-    return { wch: Math.min(maxLen + 2, 40) };
-  });
-  ws['!cols'] = colWidths;
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Data');
-  XLSX.writeFile(wb, `${filename}.xlsx`);
+  const rows = [headers, ...data].map((row) =>
+    row.map((cell) => {
+      const value = cell instanceof Date ? cell.toISOString() : String(cell ?? '');
+      return `"${value.replace(/"/g, '""')}"`;
+    }).join(',')
+  );
+  const csv = `\uFEFF${rows.join('\n')}`;
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
 export { formatRupiahPlain };

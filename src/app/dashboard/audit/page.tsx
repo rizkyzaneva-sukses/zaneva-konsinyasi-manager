@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 interface AuditLog {
   id: string;
   timestamp: string;
-  user: { nama: string; email: string };
+  user: { nama: string; username: string };
   aksi: string;
-  tabel: string;
+  tabelTerkait: string;
   recordId: string;
   keterangan: string;
   dataSebelum: Record<string, unknown> | null;
@@ -101,9 +101,9 @@ export default function AuditPage() {
       .then((d) => {
         if (d.success) {
           setLogs(d.data);
-          if (d.meta) {
-            setTotalPages(d.meta.totalPages || 1);
-            setTotalCount(d.meta.total || 0);
+          if (d.pagination) {
+            setTotalPages(d.pagination.totalPages || 1);
+            setTotalCount(d.pagination.total || 0);
           }
         }
       })
@@ -192,14 +192,14 @@ export default function AuditPage() {
                       <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] text-xs">{formatDateTime(log.timestamp)}</td>
                       <td className="py-3 px-3">
                         <p className="text-[hsl(var(--foreground))]">{log.user?.nama}</p>
-                        <p className="text-[hsl(var(--muted-foreground))] text-xs">{log.user?.email}</p>
+                        <p className="text-[hsl(var(--muted-foreground))] text-xs">@{log.user?.username}</p>
                       </td>
                       <td className="py-3 px-3 text-center">
                         <span className={`badge text-xs ${AKSI_COLORS[log.aksi] || 'text-gray-400 bg-gray-400/10'}`}>
                           {log.aksi}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] font-mono text-xs">{log.tabel}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] font-mono text-xs">{log.tabelTerkait}</td>
                       <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] font-mono text-xs max-w-[120px] truncate">{log.recordId}</td>
                       <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] text-xs max-w-[200px] truncate">{log.keterangan || '-'}</td>
                     </tr>
