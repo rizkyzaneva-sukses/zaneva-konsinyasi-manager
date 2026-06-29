@@ -16,6 +16,12 @@ type InvoiceLike = {
   pembayarans?: unknown[];
 };
 
+type PaymentLike = {
+  tanggalBayar?: Date | string;
+  status?: string;
+  [key: string]: unknown;
+};
+
 export function getInvoiceNumber(invoice: InvoiceLike): string {
   if (invoice.noInvoice) return invoice.noInvoice;
   const date = invoice.createdAt ? new Date(invoice.createdAt) : new Date();
@@ -35,12 +41,21 @@ export async function generateInvoiceNumber(): Promise<string> {
 }
 
 export function presentInvoice<T extends InvoiceLike>(invoice: T) {
-  const pembayaran = invoice.pembayaran || invoice.pembayarans || [];
+  const pembayaran = (invoice.pembayaran || invoice.pembayarans || []) as PaymentLike[];
 
   return {
     ...invoice,
     noInvoice: getInvoiceNumber(invoice),
-    pembayarans: pembayaran,
+    pembayarans: pembayaran.map((payment) => ({
+      ...payment,
+      tanggal: payment.tanggalBayar,
+      statusLabel:
+        payment.status === 'APPROVED'
+          ? 'Disetujui'
+          : payment.status === 'REJECTED'
+            ? 'Ditolak'
+            : 'Menunggu Verifikasi Owner',
+    })),
     pembayaran,
     items: invoice.items?.map((item) => ({
       ...item,

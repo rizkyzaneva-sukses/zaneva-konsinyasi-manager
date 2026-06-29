@@ -63,6 +63,7 @@ export async function resetTrialData(): Promise<TrialSummary> {
     prisma.returBarang.deleteMany(),
     prisma.laporanPenjualan.deleteMany(),
     prisma.stokMasuk.deleteMany(),
+    prisma.reorderPoint.deleteMany(),
     prisma.auditLog.deleteMany(),
     prisma.user.deleteMany({ where: { role: 'VENUE' } }),
     prisma.produk.deleteMany(),
@@ -128,6 +129,13 @@ export async function seedDummyData(ownerUserId: string): Promise<TrialSummary> 
           tanggal: sevenDaysAgo,
           keterangan: 'Dummy trial drop awal',
           createdBy: ownerUserId,
+        },
+      });
+      await prisma.reorderPoint.create({
+        data: {
+          venueId: venue.id,
+          produkId: product.id,
+          minStok: 4 + index,
         },
       });
       summary.stockMovements++;
@@ -203,6 +211,9 @@ export async function seedDummyData(ownerUserId: string): Promise<TrialSummary> 
         data: {
           invoiceId: invoice.id,
           jumlah: totalTagihan,
+          status: 'APPROVED',
+          verifiedBy: ownerUserId,
+          verifiedAt: new Date(),
           keterangan: 'Dummy trial pembayaran lunas',
         },
       });

@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { formatRupiah, formatDate, getStatusColor, getStatusLabel } from '@/lib/utils';
-import { X, CreditCard, CheckCircle, Download, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { X, CreditCard, CheckCircle, Download, FileSpreadsheet, Loader2, ShieldCheck, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { exportToPDF, exportToExcel } from '@/lib/export';
 
@@ -24,6 +24,9 @@ interface Pembayaran {
   tanggal: string;
   jumlah: number;
   keterangan: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  statusLabel?: string;
+  rejectedReason?: string;
   invoice: { noInvoice: string; venue: { nama: string } };
 }
 
@@ -37,15 +40,19 @@ export default function PaymentsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [exporting, setExporting] = useState<'pdf' | 'excel' | null>(null);
+  const [currentRole, setCurrentRole] = useState<'ADMIN' | 'STAFF' | 'VENUE'>('STAFF');
+  const [processingPaymentId, setProcessingPaymentId] = useState<string | null>(null);
 
   const fetchData = useCallback(() => {
     setLoading(true);
     Promise.all([
+      fetch('/api/auth/me').then((r) => r.json()),
       fetch('/api/invoices?status=BELUM_DIBAYAR').then((r) => r.json()),
       fetch('/api/invoices?status=TELAT').then((r) => r.json()),
       fetch('/api/payments').then((r) => r.json()),
     ])
-      .then(([unpaid, late, payments]) => {
+      .then(([me, unpaid, late, payments]) => {
+        if (me.success) setCurrentRole(me.data.role);
         const invoices: Invoice[] = [];
         if (unpaid.success) invoices.push(...unpaid.data);
         if (late.success) invoices.push(...late.data);
@@ -89,7 +96,7 @@ export default function PaymentsPage() {
       });
       const data = await res.json();
       if (data.success) {
-        toast.success('Pembayaran berhasil dicatat');
+        toast.success(data.data?.needsVerification ? 'Pembayaran menunggu verifikasi Owner' : 'Pembayaran berhasil dicatat');
         setShowPayModal(false);
         setSelectedInvoice(null);
         fetchData();
@@ -103,6 +110,38 @@ export default function PaymentsPage() {
     }
   };
 
+  const handleVerifyPayment = async (payment: Pembayaran, action: 'approve' | 'reject') => {
+    if (currentRole !== 'ADMIN') {
+      toast.error('Hanya Owner/Admin yang bisa verifikasi pembayaran');
+      return;
+    }
+
+    const rejectedReason = action === 'reject'
+      ? window.prompt('Alasan penolakan pembayaran?', 'Nominal/bukti belum sesuai') || 'Ditolak Owner'
+      : undefined;
+
+    setProcessingPaymentId(payment.id);
+    try {
+      const res = await fetch(`/api/payments/${payment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, rejectedReason }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(action === 'approve' ? 'Pembayaran disetujui' : 'Pembayaran ditolak');
+        fetchData();
+      } else {
+        toast.error(data.error || 'Gagal memproses verifikasi');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan');
+    } finally {
+      setProcessingPaymentId(null);
+    }
+  };
+
+  const pendingPayments = paymentHistory.filter((payment) => payment.status === 'PENDING');
   const totalUnpaid = unpaidInvoices.reduce((sum, inv) => sum + inv.totalTagihan, 0);
 
   const handleExportPDF = async () => {
@@ -112,16 +151,17 @@ export default function PaymentsPage() {
     }
     setExporting('pdf');
     try {
-      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Keterangan'];
+      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Status', 'Keterangan'];
       const data = paymentHistory.map((p) => [
         formatDate(p.tanggal),
         p.invoice?.noInvoice || '',
         p.invoice?.venue?.nama || '',
         p.jumlah,
+        p.statusLabel || p.status,
         p.keterangan || '-',
       ]);
       const total = paymentHistory.reduce((sum, p) => sum + p.jumlah, 0);
-      data.push(['', '', 'TOTAL', total, '']);
+      data.push(['', '', 'TOTAL', total, '', '']);
       exportToPDF('Riwayat Pembayaran', headers, data, `pembayaran-${new Date().toISOString().slice(0, 10)}`,
         `${paymentHistory.length} transaksi pembayaran`);
       toast.success('PDF berhasil diunduh');
@@ -139,12 +179,13 @@ export default function PaymentsPage() {
     }
     setExporting('excel');
     try {
-      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Keterangan'];
+      const headers = ['Tanggal', 'Invoice', 'Venue', 'Jumlah', 'Status', 'Keterangan'];
       const data = paymentHistory.map((p) => [
         p.tanggal,
         p.invoice?.noInvoice || '',
         p.invoice?.venue?.nama || '',
         p.jumlah,
+        p.statusLabel || p.status,
         p.keterangan || '',
       ]);
       exportToExcel(headers, data, `pembayaran-${new Date().toISOString().slice(0, 10)}`);
@@ -232,7 +273,12 @@ export default function PaymentsPage() {
 
         {/* Payment History */}
         <div>
-          <h4 className="text-sm font-medium text-[hsl(var(--foreground))] mb-3">Riwayat Pembayaran</h4>
+          <h4 className="text-sm font-medium text-[hsl(var(--foreground))] mb-3">
+            Riwayat Pembayaran
+            {pendingPayments.length > 0 && (
+              <span className="ml-2 badge bg-amber-500/10 text-amber-500">{pendingPayments.length} menunggu verifikasi</span>
+            )}
+          </h4>
           {loading ? (
             <div className="animate-pulse space-y-2">
               {[1, 2].map((i) => <div key={i} className="card h-14" />)}
@@ -248,7 +294,11 @@ export default function PaymentsPage() {
                     <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Invoice</th>
                     <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Venue</th>
                     <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Jumlah</th>
+                    <th className="text-center py-3 px-3 text-[hsl(var(--table-header))] font-medium">Status</th>
                     <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Keterangan</th>
+                    {currentRole === 'ADMIN' && (
+                      <th className="text-center py-3 px-3 text-[hsl(var(--table-header))] font-medium">Verifikasi</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody>
@@ -258,7 +308,44 @@ export default function PaymentsPage() {
                       <td className="py-3 px-3 text-[hsl(var(--foreground))] font-mono text-xs">{p.invoice?.noInvoice}</td>
                       <td className="py-3 px-3 text-[hsl(var(--foreground))]">{p.invoice?.venue?.nama}</td>
                       <td className="py-3 px-3 text-right text-[hsl(var(--primary))] font-medium">{formatRupiah(p.jumlah)}</td>
-                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{p.keterangan || '-'}</td>
+                      <td className="py-3 px-3 text-center">
+                        <span className={`badge ${
+                          p.status === 'APPROVED'
+                            ? 'bg-green-500/10 text-green-500'
+                            : p.status === 'REJECTED'
+                              ? 'bg-red-500/10 text-red-500'
+                              : 'bg-amber-500/10 text-amber-500'
+                        }`}>
+                          {p.statusLabel || p.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">
+                        {p.status === 'REJECTED' ? p.rejectedReason || 'Ditolak Owner' : p.keterangan || '-'}
+                      </td>
+                      {currentRole === 'ADMIN' && (
+                        <td className="py-3 px-3 text-center">
+                          {p.status === 'PENDING' ? (
+                            <div className="flex justify-center gap-2">
+                              <button
+                                onClick={() => handleVerifyPayment(p, 'approve')}
+                                disabled={processingPaymentId === p.id}
+                                className="btn-primary text-xs px-2 py-1 flex items-center gap-1"
+                              >
+                                <ShieldCheck className="w-3 h-3" /> Approve
+                              </button>
+                              <button
+                                onClick={() => handleVerifyPayment(p, 'reject')}
+                                disabled={processingPaymentId === p.id}
+                                className="btn-secondary text-xs px-2 py-1 flex items-center gap-1"
+                              >
+                                <XCircle className="w-3 h-3" /> Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-[hsl(var(--muted-foreground))]">Selesai</span>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -294,6 +381,11 @@ export default function PaymentsPage() {
                   <span className="text-[hsl(var(--muted-foreground))]">Total Tagihan</span>
                   <span className="text-[hsl(var(--primary))] font-bold">{formatRupiah(selectedInvoice.totalTagihan)}</span>
                 </div>
+                {currentRole === 'STAFF' && (
+                  <p className="mt-3 text-xs text-amber-500">
+                    Pembayaran yang dicatat Staff akan masuk status menunggu verifikasi Owner.
+                  </p>
+                )}
               </div>
 
               <form onSubmit={handlePay} className="space-y-4">
@@ -321,7 +413,7 @@ export default function PaymentsPage() {
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button type="submit" className="btn-primary flex-1" disabled={submitting}>
-                    {submitting ? 'Memproses...' : 'Bayar'}
+                    {submitting ? 'Memproses...' : currentRole === 'ADMIN' ? 'Bayar & Approve' : 'Ajukan Pembayaran'}
                   </button>
                   <button type="button" onClick={() => setShowPayModal(false)} className="btn-secondary">Batal</button>
                 </div>

@@ -32,6 +32,12 @@ enum JenisStokMasuk {
   PENARIKAN
 }
 
+enum PaymentStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   nama         String
@@ -68,6 +74,7 @@ model Venue {
   laporanPenjualan     LaporanPenjualan[]
   invoices             Invoice[]
   returBarang          ReturBarang[]
+  reorderPoints        ReorderPoint[]
 
   @@index([status])
 }
@@ -87,6 +94,7 @@ model Produk {
   laporanPenjualan LaporanPenjualan[]
   invoiceItems     InvoiceItem[]
   returBarang      ReturBarang[]
+  reorderPoints     ReorderPoint[]
 
   @@index([kategori])
   @@index([sku])
@@ -175,6 +183,10 @@ model Pembayaran {
   invoiceId         String   @db.Uuid
   tanggalBayar      DateTime @default(now())
   jumlah            Int
+  status            PaymentStatus @default(PENDING)
+  verifiedBy        String?  @db.Uuid
+  verifiedAt        DateTime?
+  rejectedReason    String?
   buktiTransferUrl  String?
   dokumenKwitansiUrl String?
   keterangan        String?
@@ -183,6 +195,23 @@ model Pembayaran {
   invoice             Invoice @relation(fields: [invoiceId], references: [id])
 
   @@index([invoiceId])
+  @@index([status])
+}
+
+model ReorderPoint {
+  id        String   @id @default(uuid()) @db.Uuid
+  venueId   String   @db.Uuid
+  produkId  String   @db.Uuid
+  minStok   Int      @default(5)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  venue     Venue    @relation(fields: [venueId], references: [id])
+  produk    Produk   @relation(fields: [produkId], references: [id])
+
+  @@unique([venueId, produkId])
+  @@index([venueId])
+  @@index([produkId])
 }
 
 model ReturBarang {

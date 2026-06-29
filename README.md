@@ -56,8 +56,8 @@ docker compose exec app npx tsx prisma/seed.ts
 
 ## Role Tim
 
-- **Owner/Admin**: akses penuh untuk user, venue, produk, margin, invoice, pembayaran, audit, dan laporan.
-- **Staff Operasional**: menjalankan pekerjaan harian seperti input stok, penjualan, retur, draft invoice, catat pembayaran, export laporan, dan monitoring venue.
+- **Owner/Admin**: akses penuh untuk user, venue, produk, margin, invoice, approval pembayaran, audit, dan laporan.
+- **Staff Operasional**: menjalankan pekerjaan harian seperti input stok, penjualan, retur, draft invoice, ajukan pembayaran, export laporan, dan monitoring venue.
 - **Venue**: akun partner eksternal untuk input penjualan/retur dan melihat riwayat venue sendiri.
 
 ## User & Password Venue
@@ -73,9 +73,11 @@ Menu **Venue** dipakai untuk data toko/partner, sedangkan username/password logi
 ## Catatan Alur Data
 
 - Stok venue dihitung dari `DROP_AWAL + RESTOCK - PENARIKAN - PENJUALAN - RETUR`.
+- ROP/min stok bisa diatur per kombinasi venue + produk dari menu **Stok**.
 - Invoice punya nomor otomatis `ZKM-YYYY-0001`.
 - Sistem menolak invoice dobel untuk venue dan periode yang sama.
-- Pembayaran dicatat melalui transaction agar status invoice dan payment tidak mudah tidak sinkron.
+- Pembayaran dari Staff masuk status `PENDING` dan wajib diverifikasi Owner/Admin.
+- Pembayaran dari Owner/Admin otomatis `APPROVED`; invoice lunas hanya dihitung dari pembayaran approved.
 
 ## Trial Tools Owner
 
@@ -114,6 +116,28 @@ Webhook events yang dikirim ke n8n:
 | PEMBAYARAN_DITERIMA | ✅               | —                   |
 | INVOICE_TELAT       | ✅               | ✅                  |
 | RETUR_DIPROSES      | ✅               | —                   |
+| PEMBAYARAN_MENUNGGU_VERIFIKASI | —     | ✅                  |
+| PEMBAYARAN_DIVERIFIKASI | ✅           | ✅                  |
+
+## WAHA / WhatsApp Workflow
+
+Rekomendasi integrasi WAHA:
+
+- Kirim invoice terbit ke PIC venue.
+- Kirim reminder jatuh tempo H-3, H-1, hari H, dan telat.
+- Kirim konfirmasi pembayaran setelah Owner/Admin approve.
+- Kirim alert stok rendah berdasarkan ROP per venue-produk.
+- Broadcast pengumuman bisa pilih semua venue atau sebagian venue.
+
+Untuk chat masuk dari venue, gunakan command terbatas, bukan AI bebas:
+
+- `STOK` → balas ringkasan stok venue dari nomor WA yang terdaftar.
+- `STOK <SKU>` → balas stok produk tertentu.
+- `INVOICE` → balas invoice belum lunas milik venue tersebut.
+- `INVOICE <NO_INVOICE>` → balas detail invoice tertentu.
+- `HELP` → balas daftar format yang didukung.
+
+Jika pesan tidak cocok format, bot cukup balas contoh format. Jangan biarkan AI menjawab di luar ruang lingkup stok/invoice.
 
 ## Project Structure
 

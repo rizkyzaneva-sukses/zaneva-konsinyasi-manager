@@ -25,6 +25,8 @@ interface Pembayaran {
   id: string;
   tanggal: string;
   jumlah: number;
+  status?: string;
+  statusLabel?: string;
   keterangan: string;
 }
 
@@ -446,7 +448,9 @@ function InvoicesPageContent() {
                           <div key={p.id} className="card p-3 flex justify-between items-center">
                             <div>
                               <p className="text-[hsl(var(--foreground))] text-sm">{formatDate(p.tanggal)}</p>
-                              <p className="text-[hsl(var(--muted-text))] text-xs">{p.keterangan || '-'}</p>
+                              <p className="text-[hsl(var(--muted-text))] text-xs">
+                                {p.statusLabel || p.status || 'Menunggu Verifikasi Owner'} · {p.keterangan || '-'}
+                              </p>
                             </div>
                             <p className="text-[hsl(var(--primary))] font-medium">{formatRupiah(p.jumlah)}</p>
                           </div>

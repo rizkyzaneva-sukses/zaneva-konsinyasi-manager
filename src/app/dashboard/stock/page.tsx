@@ -17,6 +17,8 @@ interface StockItem {
   totalTerjual: number;
   totalRetur: number;
   sisaStok: number;
+  minStok: number;
+  isBelowRop: boolean;
 }
 
 interface Venue {
@@ -58,6 +60,7 @@ export default function StockPage() {
   ]);
   const [bulkSaving, setBulkSaving] = useState(false);
   const [bulkErrors, setBulkErrors] = useState<Record<number, string>>({});
+  const [savingRop, setSavingRop] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -160,16 +163,44 @@ export default function StockPage() {
     }
   };
 
-  const getStokColor = (sisa: number): string => {
+  const getStokColor = (sisa: number, minStok = 5): string => {
     if (sisa < 0) return 'text-red-600 dark:text-red-400';
-    if (sisa < 5) return 'text-amber-600 dark:text-amber-400';
+    if (sisa <= minStok) return 'text-amber-600 dark:text-amber-400';
     return 'text-[hsl(var(--primary))]';
   };
 
-  const getStokBgColor = (sisa: number): string => {
+  const getStokBgColor = (sisa: number, minStok = 5): string => {
     if (sisa < 0) return 'bg-red-500/10';
-    if (sisa < 5) return 'bg-amber-500/10';
+    if (sisa <= minStok) return 'bg-amber-500/10';
     return 'bg-green-500/10';
+  };
+
+  const updateRop = async (item: StockItem, minStok: number) => {
+    if (!selectedVenue || minStok === item.minStok || minStok < 0) return;
+
+    setSavingRop(item.produkId);
+    try {
+      const res = await fetch('/api/reorder-points', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          venueId: selectedVenue,
+          produkId: item.produkId,
+          minStok,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`ROP ${item.produkNama} disimpan`);
+        fetchStock(selectedVenue);
+      } else {
+        toast.error(data.error || 'Gagal menyimpan ROP');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan koneksi');
+    } finally {
+      setSavingRop(null);
+    }
   };
 
   // Bulk assign handlers
@@ -341,13 +372,14 @@ export default function StockPage() {
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Penarikan</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Terjual</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Retur</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">ROP</th>
                     <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Sisa Stok</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stock.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
+                      <td colSpan={8} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
                         Belum ada data stok untuk venue ini
                       </td>
                     </tr>
@@ -364,10 +396,27 @@ export default function StockPage() {
                         <td className="py-3 px-4 text-right text-green-500 font-medium">{s.totalTerjual}</td>
                         <td className="py-3 px-4 text-right text-amber-500 font-medium">{s.totalRetur}</td>
                         <td className="py-3 px-4 text-right">
+                          <input
+                            type="number"
+                            min={0}
+                            defaultValue={s.minStok}
+                            disabled={savingRop === s.produkId}
+                            onBlur={(e) => updateRop(s, parseInt(e.target.value) || 0)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="input-field w-20 py-1 text-right text-sm"
+                            title="Reorder point / batas stok rendah"
+                          />
+                        </td>
+                        <td className="py-3 px-4 text-right">
                           <span
                             className={`inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded-lg text-sm font-bold ${getStokColor(
-                              s.sisaStok
-                            )} ${getStokBgColor(s.sisaStok)}`}
+                              s.sisaStok,
+                              s.minStok
+                            )} ${getStokBgColor(s.sisaStok, s.minStok)}`}
                           >
                             {s.sisaStok}
                           </span>
@@ -383,7 +432,7 @@ export default function StockPage() {
                 {stock.length} produk ·{' '}
                 <span className="text-red-500">{stock.filter((s) => s.sisaStok < 0).length} over-sold</span>
                 {' · '}
-                <span className="text-amber-500">{stock.filter((s) => s.sisaStok >= 0 && s.sisaStok < 5).length} stok rendah</span>
+                <span className="text-amber-500">{stock.filter((s) => s.sisaStok >= 0 && s.sisaStok <= s.minStok).length} stok rendah/ROP</span>
               </div>
             )}
           </div>

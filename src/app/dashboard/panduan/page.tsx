@@ -252,8 +252,8 @@ export default function PanduanPage() {
                 Di sistem ini akun ADMIN dipakai sebagai Owner, sedangkan STAFF dipakai untuk operasional harian.
               </p>
               <Steps>
-                <Step num={1} title="Owner / ADMIN" desc="Akses penuh: kelola user, venue, produk, margin, invoice, pembayaran, audit, dan laporan." />
-                <Step num={2} title="Staff Operasional" desc="Fokus input harian: stok, penjualan, retur, draft invoice, pembayaran, export laporan, dan monitoring venue." />
+                <Step num={1} title="Owner / ADMIN" desc="Akses penuh: kelola user, venue, produk, margin, invoice, approval pembayaran, audit, dan laporan." />
+                <Step num={2} title="Staff Operasional" desc="Fokus input harian: stok, penjualan, retur, draft invoice, ajukan pembayaran, export laporan, dan monitoring venue." />
                 <Step num={3} title="Batas Staff" desc="Staff tidak mengelola user, tidak mengubah margin/harga sensitif, dan tidak menghapus data penting permanen." />
               </Steps>
               <TipBox type="info">
@@ -379,10 +379,11 @@ export default function PanduanPage() {
                 <Step num={1} title="Drop Awal" desc="Kirim stok pertama kali ke venue baru. Pilih venue → tambahkan produk & qty → submit." />
                 <Step num={2} title="Restock" desc="Isi ulang stok venue yang sudah berjalan. Sistem akan menambah qty yang ada." />
                 <Step num={3} title="Penarikan" desc="Tarik stok dari venue (misal produk tidak laku). Sistem mengurangi saldo stok venue dan mencatatnya sebagai movement penarikan." />
-                <Step num={4} title="Bulk Assign" desc="Untuk distribusi ke banyak venue sekaligas, gunakan tombol 'Bulk Assign'." />
+                <Step num={4} title="Set ROP" desc="Atur batas minimum stok di kolom ROP per produk. Batas ini bisa beda untuk tiap venue." />
+                <Step num={5} title="Bulk Assign" desc="Untuk distribusi ke banyak venue sekaligas, gunakan tombol 'Bulk Assign'." />
               </Steps>
               <TipBox type="info">
-                Stok real-time dihitung dari drop/restock dikurangi penarikan, penjualan, dan retur.
+                Stok rendah memakai ROP masing-masing venue-produk, bukan angka global yang sama untuk semua venue.
               </TipBox>
             </GuideSection>
 
@@ -398,11 +399,30 @@ export default function PanduanPage() {
               <Steps>
                 <Step num={1} title="Buat Invoice" desc="Buka menu Invoice → 'Buat Invoice'. Pilih venue dan periode. Sistem memberi nomor invoice otomatis dan menolak periode yang sudah pernah ditagih." />
                 <Step num={2} title="Kirim ke Venue" desc="Export invoice ke PDF dan kirim ke venue via WhatsApp/email." />
-                <Step num={3} title="Catat Pembayaran" desc="Saat venue bayar, buka menu Pembayaran → catat jumlah dan metode bayar." />
-                <Step num={4} title="Verifikasi" desc="Invoice otomatis berubah status menjadi lunas saat total pembayaran sudah sama dengan total tagihan." />
+                <Step num={3} title="Staff Ajukan Pembayaran" desc="Saat venue bayar, Staff buka menu Pembayaran → catat jumlah. Statusnya menunggu verifikasi Owner." />
+                <Step num={4} title="Owner Verifikasi" desc="Owner/Admin approve atau reject pembayaran. Invoice lunas hanya dihitung dari pembayaran yang sudah approved." />
               </Steps>
               <TipBox type="tip">
                 Invoice yang jatuh tempo akan muncul sebagai notifikasi di bell icon.
+              </TipBox>
+            </GuideSection>
+
+            <GuideSection
+              icon={CreditCard}
+              title="WAHA / WhatsApp"
+              color="#22c55e"
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                WAHA cocok dipakai sebagai jalur notifikasi dan command singkat venue.
+              </p>
+              <Steps>
+                <Step num={1} title="Notifikasi Invoice" desc="Kirim invoice terbit, reminder jatuh tempo, dan konfirmasi pembayaran approved ke nomor PIC venue." />
+                <Step num={2} title="Alert Stok Rendah" desc="Kirim alert ke internal saat stok venue menyentuh ROP masing-masing produk." />
+                <Step num={3} title="Command Venue" desc="Batasi command ke STOK, STOK SKU, INVOICE, INVOICE NOMOR, dan HELP." />
+                <Step num={4} title="Broadcast Terarah" desc="Owner/Admin bisa kirim pengumuman ke semua venue atau pilih sebagian venue." />
+              </Steps>
+              <TipBox type="warning">
+                Jangan pakai AI bebas untuk menjawab semua chat WA. Gunakan allowlist format agar bot tidak jawab keluar konteks.
               </TipBox>
             </GuideSection>
 

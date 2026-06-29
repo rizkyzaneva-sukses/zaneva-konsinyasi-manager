@@ -126,13 +126,14 @@ export function NotificationBell() {
 
             stockResponses.forEach(({ venue, data }) => {
               if (data?.success && data.data) {
-                data.data.forEach((item: { produkId: string; produkNama?: string; sisaStok: number }) => {
-                  if (item.sisaStok < 5 && item.sisaStok > 0) {
+                data.data.forEach((item: { produkId: string; produkNama?: string; sisaStok: number; minStok?: number }) => {
+                  const minStok = item.minStok ?? 5;
+                  if (item.sisaStok <= minStok && item.sisaStok >= 0) {
                     notifs.push({
                       id: `lowstock-${item.produkId}-${venue.id}`,
                       type: 'low_stock',
                       title: 'Stok Rendah',
-                      message: `${item.produkNama || 'Produk'} di ${venue.nama} sisa ${item.sisaStok}`,
+                      message: `${item.produkNama || 'Produk'} di ${venue.nama} sisa ${item.sisaStok} (ROP ${minStok})`,
                       link: '/dashboard/stock',
                       icon: 'alert',
                       timestamp: now.toISOString(),

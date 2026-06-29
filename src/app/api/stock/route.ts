@@ -76,13 +76,14 @@ export async function POST(request: NextRequest) {
       jenis: stokMasuk.jenis,
     });
 
-    // Check if stock is low (threshold: 5)
-    const sisaStok = await calculateStok(data.venueId, data.produkId);
-    if (sisaStok <= 5) {
+    const venueStock = await getVenueStock(data.venueId);
+    const currentStock = venueStock.find((item) => item.produkId === data.produkId);
+    if (currentStock && currentStock.sisaStok <= currentStock.minStok) {
       sendWebhook('STOK_RENDAH', {
         venueNama: stokMasuk.venue.nama,
         produkNama: stokMasuk.produk.nama,
-        sisaStok,
+        sisaStok: currentStock.sisaStok,
+        minStok: currentStock.minStok,
       });
     }
 
