@@ -18,6 +18,7 @@ import {
   Moon,
   Trophy,
   BookOpen,
+  Settings,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -36,6 +37,7 @@ const adminMenuItems = [
   { href: '/dashboard/payments', label: 'Pembayaran', icon: CreditCard },
   { href: '/dashboard/returns', label: 'Retur', icon: RotateCcw },
   { href: '/dashboard/audit', label: 'Audit Trail', icon: ClipboardList },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/panduan', label: 'Panduan', icon: BookOpen },
 ];
 

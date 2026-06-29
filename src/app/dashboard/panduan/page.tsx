@@ -261,6 +261,24 @@ export default function PanduanPage() {
               </TipBox>
             </GuideSection>
 
+            <GuideSection
+              icon={Shield}
+              title="Owner Settings: Dummy & Reset Trial"
+              color="#ef4444"
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                Menu Settings hanya muncul untuk Owner/Admin. Gunakan ini untuk persiapan demo atau membersihkan data setelah trial.
+              </p>
+              <Steps>
+                <Step num={1} title="Suntik Dummy Data" desc="Buka Settings → klik 'Suntik Dummy Data' untuk mengisi contoh produk, venue, stok, penjualan, retur, invoice, dan pembayaran." />
+                <Step num={2} title="Reset Data Trial" desc="Ketik RESET DATA lalu klik reset untuk mengosongkan data operasional setelah trial." />
+                <Step num={3} title="Akun Tetap Aman" desc="Reset tidak menghapus akun Owner/Admin dan Staff, supaya tim tetap bisa login setelah data dikosongkan." />
+              </Steps>
+              <TipBox type="warning">
+                Jangan jalankan reset di data produksi kecuali sudah yakin dan sudah punya backup.
+              </TipBox>
+            </GuideSection>
+
             {/* Alur Konsinyasi */}
             <GuideSection
               icon={Zap}

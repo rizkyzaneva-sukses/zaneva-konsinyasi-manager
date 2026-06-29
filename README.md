@@ -67,6 +67,16 @@ docker compose exec app npx tsx prisma/seed.ts
 - Sistem menolak invoice dobel untuk venue dan periode yang sama.
 - Pembayaran dicatat melalui transaction agar status invoice dan payment tidak mudah tidak sinkron.
 
+## Trial Tools Owner
+
+Owner/Admin memiliki menu **Settings** untuk kebutuhan demo dan trial:
+
+- **Suntik Dummy Data**: mengisi contoh produk Zaneva, venue partner, stok, penjualan, retur, invoice, dan pembayaran.
+- **Reset Data Trial**: mengosongkan data operasional setelah trial selesai.
+- Reset trial tidak menghapus akun internal Owner/Admin dan Staff, supaya tim tetap bisa login.
+
+Jalankan reset hanya setelah yakin data trial boleh dikosongkan.
+
 ## Deploy ke EasyPanel
 
 1. Push repo ke GitHub
