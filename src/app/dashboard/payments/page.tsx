@@ -108,52 +108,52 @@ export default function PaymentsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Pembayaran</h3>
-          <div className="bg-navy-800/50 border border-navy-700 rounded-xl px-4 py-2">
-            <p className="text-xs text-navy-400">Total Belum Dibayar</p>
-            <p className="text-accent font-bold text-lg">{formatRupiah(totalUnpaid)}</p>
+          <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Pembayaran</h3>
+          <div className="card px-4 py-2">
+            <p className="text-xs text-[hsl(var(--muted-foreground))]">Total Belum Dibayar</p>
+            <p className="text-[hsl(var(--primary))] font-bold text-lg">{formatRupiah(totalUnpaid)}</p>
           </div>
         </div>
 
         {/* Unpaid Invoices */}
         <div>
-          <h4 className="text-sm font-medium text-navy-300 mb-3 flex items-center gap-2">
+          <h4 className="text-sm font-medium text-[hsl(var(--foreground))] mb-3 flex items-center gap-2">
             <CreditCard className="w-4 h-4" /> Invoice Belum Dibayar / Telat
           </h4>
           {loading ? (
             <div className="animate-pulse space-y-2">
-              {[1, 2, 3].map((i) => <div key={i} className="card h-16 bg-navy-800" />)}
+              {[1, 2, 3].map((i) => <div key={i} className="card h-16" />)}
             </div>
           ) : unpaidInvoices.length === 0 ? (
-            <div className="card text-center text-navy-500 py-8">
-              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-accent" />
+            <div className="card text-center text-[hsl(var(--muted-text))] py-8">
+              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-[hsl(var(--primary))]" />
               Semua invoice sudah dibayar
             </div>
           ) : (
-            <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-x-auto">
+            <div className="card overflow-hidden p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-700">
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">No Invoice</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Venue</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Periode</th>
-                    <th className="text-right py-3 px-3 text-navy-400 font-medium">Total Tagihan</th>
-                    <th className="text-center py-3 px-3 text-navy-400 font-medium">Status</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Jatuh Tempo</th>
-                    <th className="text-center py-3 px-3 text-navy-400 font-medium">Aksi</th>
+                  <tr className="border-b border-[hsl(var(--border))]">
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">No Invoice</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Venue</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Periode</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Total Tagihan</th>
+                    <th className="text-center py-3 px-3 text-[hsl(var(--table-header))] font-medium">Status</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Jatuh Tempo</th>
+                    <th className="text-center py-3 px-3 text-[hsl(var(--table-header))] font-medium">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {unpaidInvoices.map((inv) => (
-                    <tr key={inv.id} className="border-b border-navy-700/50 hover:bg-navy-800/50">
-                      <td className="py-3 px-3 text-white font-mono text-xs">{inv.noInvoice}</td>
-                      <td className="py-3 px-3 text-white">{inv.venue?.nama}</td>
-                      <td className="py-3 px-3 text-navy-300 text-xs">{formatDate(inv.periodeMulai)} - {formatDate(inv.periodeAkhir)}</td>
-                      <td className="py-3 px-3 text-right text-accent font-medium">{formatRupiah(inv.totalTagihan)}</td>
+                    <tr key={inv.id} className="border-b border-[hsl(var(--table-border))] hover:bg-[hsl(var(--table-row-hover))]">
+                      <td className="py-3 px-3 text-[hsl(var(--foreground))] font-mono text-xs">{inv.noInvoice}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--foreground))]">{inv.venue?.nama}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] text-xs">{formatDate(inv.periodeMulai)} - {formatDate(inv.periodeAkhir)}</td>
+                      <td className="py-3 px-3 text-right text-[hsl(var(--primary))] font-medium">{formatRupiah(inv.totalTagihan)}</td>
                       <td className="py-3 px-3 text-center">
                         <span className={`badge ${getStatusColor(inv.status)}`}>{getStatusLabel(inv.status)}</span>
                       </td>
-                      <td className="py-3 px-3 text-navy-300">{formatDate(inv.jatuhTempo)}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{formatDate(inv.jatuhTempo)}</td>
                       <td className="py-3 px-3 text-center">
                         <button onClick={() => openPayModal(inv)} className="btn-primary text-xs px-3 py-1">
                           Bayar
@@ -169,33 +169,33 @@ export default function PaymentsPage() {
 
         {/* Payment History */}
         <div>
-          <h4 className="text-sm font-medium text-navy-300 mb-3">Riwayat Pembayaran</h4>
+          <h4 className="text-sm font-medium text-[hsl(var(--foreground))] mb-3">Riwayat Pembayaran</h4>
           {loading ? (
             <div className="animate-pulse space-y-2">
-              {[1, 2].map((i) => <div key={i} className="card h-14 bg-navy-800" />)}
+              {[1, 2].map((i) => <div key={i} className="card h-14" />)}
             </div>
           ) : paymentHistory.length === 0 ? (
-            <div className="card text-center text-navy-500 py-8">Belum ada riwayat pembayaran</div>
+            <div className="card text-center text-[hsl(var(--muted-text))] py-8">Belum ada riwayat pembayaran</div>
           ) : (
-            <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-x-auto">
+            <div className="card overflow-hidden p-0 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-700">
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Tanggal</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Invoice</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Venue</th>
-                    <th className="text-right py-3 px-3 text-navy-400 font-medium">Jumlah</th>
-                    <th className="text-left py-3 px-3 text-navy-400 font-medium">Keterangan</th>
+                  <tr className="border-b border-[hsl(var(--border))]">
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Tanggal</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Invoice</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Venue</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Jumlah</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Keterangan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paymentHistory.map((p) => (
-                    <tr key={p.id} className="border-b border-navy-700/50 hover:bg-navy-800/50">
-                      <td className="py-3 px-3 text-navy-300">{formatDate(p.tanggal)}</td>
-                      <td className="py-3 px-3 text-white font-mono text-xs">{p.invoice?.noInvoice}</td>
-                      <td className="py-3 px-3 text-white">{p.invoice?.venue?.nama}</td>
-                      <td className="py-3 px-3 text-right text-accent font-medium">{formatRupiah(p.jumlah)}</td>
-                      <td className="py-3 px-3 text-navy-400">{p.keterangan || '-'}</td>
+                    <tr key={p.id} className="border-b border-[hsl(var(--table-border))] hover:bg-[hsl(var(--table-row-hover))]">
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{formatDate(p.tanggal)}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--foreground))] font-mono text-xs">{p.invoice?.noInvoice}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--foreground))]">{p.invoice?.venue?.nama}</td>
+                      <td className="py-3 px-3 text-right text-[hsl(var(--primary))] font-medium">{formatRupiah(p.jumlah)}</td>
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{p.keterangan || '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -206,37 +206,36 @@ export default function PaymentsPage() {
 
         {/* Pay Modal */}
         {showPayModal && selectedInvoice && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={() => setShowPayModal(false)}>
-            <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowPayModal(false)}>
+            <div className="card w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
-                <h4 className="font-semibold text-white flex items-center gap-2">
-                  <CreditCard className="w-5 h-5 text-accent" />
+                <h4 className="font-semibold font-display text-[hsl(var(--foreground))] flex items-center gap-2">
+                  <CreditCard className="w-5 h-5 text-[hsl(var(--primary))]" />
                   Bayar Invoice
                 </h4>
-                <button onClick={() => setShowPayModal(false)} className="p-1 hover:bg-navy-700 rounded">
-                  <X className="w-5 h-5 text-navy-400" />
+                <button onClick={() => setShowPayModal(false)} className="p-1 hover:bg-[hsl(var(--surface-hover))] rounded">
+                  <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
                 </button>
               </div>
 
-              {/* Invoice Summary */}
-              <div className="bg-navy-800/50 border border-navy-700 rounded-lg p-3 mb-4 text-sm">
+              <div className="card p-3 mb-4 text-sm">
                 <div className="flex justify-between mb-1">
-                  <span className="text-navy-400">Invoice</span>
-                  <span className="text-white font-mono text-xs">{selectedInvoice.noInvoice}</span>
+                  <span className="text-[hsl(var(--muted-foreground))]">Invoice</span>
+                  <span className="text-[hsl(var(--foreground))] font-mono text-xs">{selectedInvoice.noInvoice}</span>
                 </div>
                 <div className="flex justify-between mb-1">
-                  <span className="text-navy-400">Venue</span>
-                  <span className="text-white">{selectedInvoice.venue?.nama}</span>
+                  <span className="text-[hsl(var(--muted-foreground))]">Venue</span>
+                  <span className="text-[hsl(var(--foreground))]">{selectedInvoice.venue?.nama}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-navy-400">Total Tagihan</span>
-                  <span className="text-accent font-bold">{formatRupiah(selectedInvoice.totalTagihan)}</span>
+                  <span className="text-[hsl(var(--muted-foreground))]">Total Tagihan</span>
+                  <span className="text-[hsl(var(--primary))] font-bold">{formatRupiah(selectedInvoice.totalTagihan)}</span>
                 </div>
               </div>
 
               <form onSubmit={handlePay} className="space-y-4">
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Jumlah Pembayaran</label>
+                  <label className="text-sm text-[hsl(var(--foreground))] mb-1 block">Jumlah Pembayaran</label>
                   <input
                     type="number"
                     value={form.jumlah || ''}
@@ -245,10 +244,10 @@ export default function PaymentsPage() {
                     min={1}
                     required
                   />
-                  {errors.jumlah && <p className="text-red-400 text-xs mt-1">{errors.jumlah}</p>}
+                  {errors.jumlah && <p className="text-red-500 text-xs mt-1">{errors.jumlah}</p>}
                 </div>
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Keterangan</label>
+                  <label className="text-sm text-[hsl(var(--foreground))] mb-1 block">Keterangan</label>
                   <input
                     type="text"
                     value={form.keterangan}

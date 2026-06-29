@@ -4,21 +4,67 @@
 
 @layer base {
   :root {
-    --background: 222 47% 7%;
-    --foreground: 210 40% 96%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 96%;
-    --primary: 142 76% 56%;
-    --primary-foreground: 222 47% 7%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 96%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 142 76% 56%;
-    --destructive: 0 84% 60%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 142 76% 56%;
+    --background: 0 0% 98%;
+    --foreground: 222 30% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 30% 12%;
+    --primary: 152 60% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 92%;
+    --secondary-foreground: 222 20% 30%;
+    --muted: 220 14% 92%;
+    --muted-foreground: 220 10% 50%;
+    --accent: 152 60% 42%;
+    --accent-light: 152 56% 88%;
+    --destructive: 0 72% 51%;
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 152 60% 42%;
+    --sidebar-bg: 0 0% 100%;
+    --sidebar-border: 220 13% 92%;
+    --sidebar-active: 152 60% 96%;
+    --sidebar-hover: 220 14% 96%;
+    --header-text: 222 30% 12%;
+    --sub-text: 220 10% 50%;
+    --muted-text: 220 8% 60%;
+    --surface-hover: 220 14% 96%;
+    --table-header: 220 10% 50%;
+    --table-border: 220 13% 92%;
+    --table-row-hover: 220 14% 97%;
+    --modal-bg: 0 0% 100%;
+    --modal-border: 220 13% 88%;
+  }
+
+  .dark {
+    --background: 222 35% 9%;
+    --foreground: 210 25% 93%;
+    --card: 222 30% 12%;
+    --card-foreground: 210 25% 93%;
+    --primary: 152 56% 50%;
+    --primary-foreground: 222 35% 9%;
+    --secondary: 222 25% 18%;
+    --secondary-foreground: 210 20% 80%;
+    --muted: 222 25% 18%;
+    --muted-foreground: 215 15% 55%;
+    --accent: 152 56% 50%;
+    --accent-light: 152 40% 25%;
+    --destructive: 0 62% 55%;
+    --border: 222 25% 20%;
+    --input: 222 25% 20%;
+    --ring: 152 56% 50%;
+    --sidebar-bg: 222 35% 7%;
+    --sidebar-border: 222 25% 16%;
+    --sidebar-active: 152 40% 15%;
+    --sidebar-hover: 222 25% 14%;
+    --header-text: 210 25% 95%;
+    --sub-text: 215 15% 55%;
+    --muted-text: 215 12% 45%;
+    --surface-hover: 222 25% 15%;
+    --table-header: 215 15% 55%;
+    --table-border: 222 25% 18%;
+    --table-row-hover: 222 25% 14%;
+    --modal-bg: 222 30% 12%;
+    --modal-border: 222 25% 20%;
   }
 }
 
@@ -27,27 +73,27 @@
     @apply border-[hsl(var(--border))];
   }
   body {
-    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))];
+    @apply bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-200;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-accent text-navy-950 px-4 py-2 rounded-lg font-medium hover:bg-accent-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))] px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
   .btn-secondary {
-    @apply bg-navy-700 text-white px-4 py-2 rounded-lg font-medium hover:bg-navy-600 transition-colors;
+    @apply bg-[hsl(var(--secondary))] text-[hsl(var(--secondary-foreground))] px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-80 transition-all duration-150 border border-[hsl(var(--border))];
   }
   .btn-danger {
-    @apply bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors;
+    @apply bg-[hsl(var(--destructive))] text-white px-4 py-2 rounded-lg font-semibold text-sm hover:opacity-90 transition-all duration-150;
   }
   .input-field {
-    @apply w-full bg-navy-800 border border-navy-600 rounded-lg px-3 py-2 text-white placeholder:text-navy-400 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent;
+    @apply w-full bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-lg px-3 py-2 text-sm text-[hsl(var(--foreground))] placeholder:text-[hsl(var(--muted-foreground))] focus:outline-none focus:ring-2 focus:ring-[hsl(var(--ring))] focus:border-transparent transition-colors duration-150;
   }
   .card {
-    @apply bg-navy-800/50 border border-navy-700 rounded-xl p-6;
+    @apply bg-[hsl(var(--card))] border border-[hsl(var(--border))] rounded-xl p-6 shadow-sm;
   }
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold;
   }
 }

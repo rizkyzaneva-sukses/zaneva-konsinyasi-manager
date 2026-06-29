@@ -123,8 +123,8 @@ export default function SalesPage() {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Laporan Penjualan</h3>
-          <div className="flex items-center gap-2 text-sm text-navy-400">
+          <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Laporan Penjualan</h3>
+          <div className="flex items-center gap-2 text-sm text-[hsl(var(--muted-foreground))]">
             <FileText className="w-4 h-4" />
             <span>{pagination.total} total transaksi</span>
           </div>
@@ -132,7 +132,7 @@ export default function SalesPage() {
 
         {/* Venue Filter */}
         <div className="max-w-sm">
-          <label className="block text-sm font-medium text-navy-300 mb-1">Filter Venue</label>
+          <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Filter Venue</label>
           <select
             value={selectedVenue}
             onChange={(e) => setSelectedVenue(e.target.value)}
@@ -150,27 +150,27 @@ export default function SalesPage() {
         {/* Table */}
         {loading ? (
           <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-accent" />
+            <Loader2 className="w-8 h-8 animate-spin text-[hsl(var(--primary))]" />
           </div>
         ) : (
           <>
-            <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-hidden">
+            <div className="card overflow-hidden p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-navy-700">
-                      <th className="text-left py-3 px-4 text-navy-400 font-medium">Tanggal</th>
-                      <th className="text-left py-3 px-4 text-navy-400 font-medium">Venue</th>
-                      <th className="text-left py-3 px-4 text-navy-400 font-medium">Produk</th>
-                      <th className="text-right py-3 px-4 text-navy-400 font-medium">Qty Terjual</th>
-                      <th className="text-right py-3 px-4 text-navy-400 font-medium">Qty Retur</th>
-                      <th className="text-left py-3 px-4 text-navy-400 font-medium">Input Oleh</th>
+                    <tr className="border-b border-[hsl(var(--border))]">
+                      <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Tanggal</th>
+                      <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Venue</th>
+                      <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                      <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Qty Terjual</th>
+                      <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Qty Retur</th>
+                      <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Input Oleh</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sales.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="text-center py-12 text-navy-400">
+                        <td colSpan={6} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
                           Belum ada data penjualan
                         </td>
                       </tr>
@@ -178,27 +178,27 @@ export default function SalesPage() {
                       sales.map((s) => (
                         <tr
                           key={s.id}
-                          className="border-b border-navy-700/50 hover:bg-navy-700/30 transition-colors"
+                          className="border-b border-[hsl(var(--table-border))] hover:bg-[hsl(var(--table-row-hover))] transition-colors"
                         >
-                          <td className="py-3 px-4 text-navy-300 whitespace-nowrap">
+                          <td className="py-3 px-4 text-[hsl(var(--muted-foreground))] whitespace-nowrap">
                             {formatDate(s.tanggal)}
                           </td>
-                          <td className="py-3 px-4 text-white">{s.venue.nama}</td>
+                          <td className="py-3 px-4 text-[hsl(var(--foreground))]">{s.venue.nama}</td>
                           <td className="py-3 px-4">
-                            <div className="text-white font-medium">{s.produk.nama}</div>
-                            <div className="text-xs text-navy-400 font-mono">{s.produk.sku}</div>
+                            <div className="text-[hsl(var(--foreground))] font-medium">{s.produk.nama}</div>
+                            <div className="text-xs text-[hsl(var(--muted-text))] font-mono">{s.produk.sku}</div>
                           </td>
                           <td className="py-3 px-4 text-right">
-                            <span className="text-green-400 font-medium">{s.qtyTerjual}</span>
+                            <span className="text-green-600 dark:text-green-400 font-medium">{s.qtyTerjual}</span>
                           </td>
                           <td className="py-3 px-4 text-right">
                             {s.qtyRetur > 0 ? (
-                              <span className="text-yellow-400 font-medium">{s.qtyRetur}</span>
+                              <span className="text-amber-600 dark:text-amber-400 font-medium">{s.qtyRetur}</span>
                             ) : (
-                              <span className="text-navy-500">-</span>
+                              <span className="text-[hsl(var(--muted-text))]">-</span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-navy-400">{s.user.nama}</td>
+                          <td className="py-3 px-4 text-[hsl(var(--muted-foreground))]">{s.user.nama}</td>
                         </tr>
                       ))
                     )}
@@ -210,21 +210,21 @@ export default function SalesPage() {
             {/* Pagination */}
             {pagination.totalPages > 1 && (
               <div className="flex items-center justify-between">
-                <p className="text-sm text-navy-400">
+                <p className="text-sm text-[hsl(var(--muted-foreground))]">
                   Halaman {pagination.page} dari {pagination.totalPages}
                 </p>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page <= 1}
-                    className="p-2 hover:bg-navy-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <ChevronLeft className="w-4 h-4 text-navy-400" />
+                    <ChevronLeft className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
                   </button>
 
                   {getPageNumbers().map((pageNum, idx) =>
                     pageNum === '...' ? (
-                      <span key={`dots-${idx}`} className="px-2 text-navy-500">
+                      <span key={`dots-${idx}`} className="px-2 text-[hsl(var(--muted-text))]">
                         ...
                       </span>
                     ) : (
@@ -233,8 +233,8 @@ export default function SalesPage() {
                         onClick={() => handlePageChange(pageNum as number)}
                         className={`min-w-[36px] h-9 rounded-lg text-sm font-medium transition-colors ${
                           pageNum === pagination.page
-                            ? 'bg-accent text-navy-950'
-                            : 'text-navy-400 hover:bg-navy-700'
+                            ? 'bg-[hsl(var(--primary))] text-[hsl(var(--primary-foreground))]'
+                            : 'text-[hsl(var(--muted-foreground))] hover:bg-[hsl(var(--surface-hover))]'
                         }`}
                       >
                         {pageNum}
@@ -245,9 +245,9 @@ export default function SalesPage() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page >= pagination.totalPages}
-                    className="p-2 hover:bg-navy-700 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    className="p-2 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                   >
-                    <ChevronRight className="w-4 h-4 text-navy-400" />
+                    <ChevronRight className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
                   </button>
                 </div>
               </div>

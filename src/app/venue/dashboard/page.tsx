@@ -35,56 +35,56 @@ export default function VenueDashboard() {
   return (
     <DashboardLayout>
       {loading ? (
-        <div className="animate-pulse space-y-4">{[1, 2, 3].map((i) => <div key={i} className="card h-24 bg-navy-800" />)}</div>
+        <div className="animate-pulse space-y-4">{[1, 2, 3].map((i) => <div key={i} className="card h-24 bg-[hsl(var(--secondary))]" />)}</div>
       ) : (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="card">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-blue-500/10 rounded-lg"><Package className="w-6 h-6 text-blue-400" /></div>
+                <div className="p-3 bg-blue-500/10 rounded-lg"><Package className="w-6 h-6 text-blue-500" /></div>
                 <div>
-                  <p className="text-sm text-navy-400">Total Produk</p>
-                  <p className="text-2xl font-bold text-white">{stock.length}</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Total Produk</p>
+                  <p className="text-2xl font-bold text-[hsl(var(--foreground))]">{stock.length}</p>
                 </div>
               </div>
             </div>
             <div className="card">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-yellow-500/10 rounded-lg"><FileText className="w-6 h-6 text-yellow-400" /></div>
+                <div className="p-3 bg-amber-500/10 rounded-lg"><FileText className="w-6 h-6 text-amber-500" /></div>
                 <div>
-                  <p className="text-sm text-navy-400">Tagihan Belum Bayar</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Tagihan Belum Bayar</p>
                   <p className="text-2xl font-bold text-accent">{formatRupiah(totalUnpaid)}</p>
                 </div>
               </div>
             </div>
             <div className="card">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-red-500/10 rounded-lg"><ShoppingCart className="w-6 h-6 text-red-400" /></div>
+                <div className="p-3 bg-red-500/10 rounded-lg"><ShoppingCart className="w-6 h-6 text-red-500" /></div>
                 <div>
-                  <p className="text-sm text-navy-400">Stok Rendah</p>
-                  <p className="text-2xl font-bold text-red-400">{lowStock.length}</p>
+                  <p className="text-sm text-[hsl(var(--muted-foreground))]">Stok Rendah</p>
+                  <p className="text-2xl font-bold text-red-500">{lowStock.length}</p>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="card">
-            <h3 className="text-lg font-semibold text-white mb-4">Stok Saat Ini</h3>
+            <h3 className="text-lg font-semibold text-[hsl(var(--foreground))] mb-4">Stok Saat Ini</h3>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-700">
-                    <th className="text-left py-3 px-2 text-navy-400 font-medium">Produk</th>
-                    <th className="text-left py-3 px-2 text-navy-400 font-medium">SKU</th>
-                    <th className="text-right py-3 px-2 text-navy-400 font-medium">Sisa Stok</th>
+                  <tr className="border-b border-[hsl(var(--table-border))]">
+                    <th className="text-left py-3 px-2 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                    <th className="text-left py-3 px-2 text-[hsl(var(--table-header))] font-medium">SKU</th>
+                    <th className="text-right py-3 px-2 text-[hsl(var(--table-header))] font-medium">Sisa Stok</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stock.map((s) => (
-                    <tr key={s.produkId} className="border-b border-navy-700/50">
-                      <td className="py-3 px-2 text-white">{s.produkNama}</td>
-                      <td className="py-3 px-2 text-navy-300 font-mono">{s.sku}</td>
-                      <td className={`py-3 px-2 text-right font-bold ${s.sisaStok <= 5 ? 'text-red-400' : 'text-accent'}`}>{s.sisaStok}</td>
+                    <tr key={s.produkId} className="border-b border-[hsl(var(--table-border))]/50">
+                      <td className="py-3 px-2 text-[hsl(var(--foreground))]">{s.produkNama}</td>
+                      <td className="py-3 px-2 text-[hsl(var(--muted-foreground))] font-mono">{s.sku}</td>
+                      <td className={`py-3 px-2 text-right font-bold ${s.sisaStok <= 5 ? 'text-red-500' : 'text-accent'}`}>{s.sisaStok}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -93,9 +93,9 @@ export default function VenueDashboard() {
           </div>
 
           {lowStock.length > 0 && (
-            <div className="card border-yellow-500/30 bg-yellow-500/5">
-              <h3 className="text-lg font-semibold text-yellow-400 mb-2">⚠️ Stok Hampir Habis</h3>
-              <p className="text-sm text-navy-300">
+            <div className="card border-amber-500/30 bg-amber-500/5">
+              <h3 className="text-lg font-semibold text-amber-500 mb-2">⚠️ Stok Hampir Habis</h3>
+              <p className="text-sm text-[hsl(var(--muted-foreground))]">
                 {lowStock.map((s) => `${s.produkNama} (sisa ${s.sisaStok})`).join(', ')}
               </p>
             </div>

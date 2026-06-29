@@ -151,14 +151,14 @@ export default function StockPage() {
   };
 
   const getStokColor = (sisa: number): string => {
-    if (sisa < 0) return 'text-red-400';
-    if (sisa < 5) return 'text-yellow-400';
-    return 'text-accent';
+    if (sisa < 0) return 'text-red-600 dark:text-red-400';
+    if (sisa < 5) return 'text-amber-600 dark:text-amber-400';
+    return 'text-[hsl(var(--primary))]';
   };
 
   const getStokBgColor = (sisa: number): string => {
     if (sisa < 0) return 'bg-red-500/10';
-    if (sisa < 5) return 'bg-yellow-500/10';
+    if (sisa < 5) return 'bg-amber-500/10';
     return 'bg-green-500/10';
   };
 
@@ -166,9 +166,9 @@ export default function StockPage() {
     return (
       <DashboardLayout>
         <div className="animate-pulse space-y-4">
-          <div className="h-10 bg-navy-800 rounded w-48" />
+          <div className="h-10 card w-48" />
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-navy-800/50 border border-navy-700 rounded-xl" />
+            <div key={i} className="h-16 card" />
           ))}
         </div>
       </DashboardLayout>
@@ -180,7 +180,7 @@ export default function StockPage() {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Stok per Venue</h3>
+          <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Stok per Venue</h3>
           <button
             onClick={openModal}
             className="btn-primary flex items-center gap-2"
@@ -192,7 +192,7 @@ export default function StockPage() {
 
         {/* Venue Selector */}
         <div className="max-w-sm">
-          <label className="block text-sm font-medium text-navy-300 mb-1">Pilih Venue</label>
+          <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Pilih Venue</label>
           <select
             value={selectedVenue}
             onChange={(e) => setSelectedVenue(e.target.value)}
@@ -209,48 +209,48 @@ export default function StockPage() {
 
         {/* Content */}
         {!selectedVenue ? (
-          <div className="bg-navy-800/50 border border-navy-700 rounded-xl flex flex-col items-center justify-center py-16">
-            <Package className="w-12 h-12 text-navy-600 mb-3" />
-            <p className="text-navy-400 text-sm">Pilih venue untuk melihat data stok</p>
+          <div className="card flex flex-col items-center justify-center py-16">
+            <Package className="w-12 h-12 text-[hsl(var(--muted-text))] mb-3" />
+            <p className="text-[hsl(var(--muted-foreground))] text-sm">Pilih venue untuk melihat data stok</p>
           </div>
         ) : loading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-16 bg-navy-800/50 border border-navy-700 rounded-xl animate-pulse" />
+              <div key={i} className="h-16 card animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-hidden">
+          <div className="card overflow-hidden p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-700">
-                    <th className="text-left py-3 px-4 text-navy-400 font-medium">Produk</th>
-                    <th className="text-left py-3 px-4 text-navy-400 font-medium">SKU</th>
-                    <th className="text-right py-3 px-4 text-navy-400 font-medium">Total Masuk</th>
-                    <th className="text-right py-3 px-4 text-navy-400 font-medium">Total Terjual</th>
-                    <th className="text-right py-3 px-4 text-navy-400 font-medium">Total Retur</th>
-                    <th className="text-right py-3 px-4 text-navy-400 font-medium">Sisa Stok</th>
+                  <tr className="border-b border-[hsl(var(--border))]">
+                    <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                    <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">SKU</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Masuk</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Terjual</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Total Retur</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Sisa Stok</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stock.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-12 text-navy-400">
+                      <td colSpan={6} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
                         Belum ada data stok untuk venue ini
                       </td>
                     </tr>
                   ) : (
                     stock.map((s) => (
-                      <tr key={s.produkId} className="border-b border-navy-700/50 hover:bg-navy-700/30 transition-colors">
+                      <tr key={s.produkId} className="border-b border-[hsl(var(--table-border))] hover:bg-[hsl(var(--table-row-hover))] transition-colors">
                         <td className="py-3 px-4">
-                          <div className="text-white font-medium">{s.produkNama}</div>
-                          <div className="text-xs text-navy-400">{s.kategori}</div>
+                          <div className="text-[hsl(var(--foreground))] font-medium">{s.produkNama}</div>
+                          <div className="text-xs text-[hsl(var(--muted-text))]">{s.kategori}</div>
                         </td>
-                        <td className="py-3 px-4 text-navy-300 font-mono">{s.sku}</td>
-                        <td className="py-3 px-4 text-right text-blue-400 font-medium">{s.totalMasuk}</td>
-                        <td className="py-3 px-4 text-right text-green-400 font-medium">{s.totalTerjual}</td>
-                        <td className="py-3 px-4 text-right text-yellow-400 font-medium">{s.totalRetur}</td>
+                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))] font-mono">{s.sku}</td>
+                        <td className="py-3 px-4 text-right text-blue-500 font-medium">{s.totalMasuk}</td>
+                        <td className="py-3 px-4 text-right text-green-500 font-medium">{s.totalTerjual}</td>
+                        <td className="py-3 px-4 text-right text-amber-500 font-medium">{s.totalRetur}</td>
                         <td className="py-3 px-4 text-right">
                           <span
                             className={`inline-flex items-center justify-center min-w-[40px] px-2 py-1 rounded-lg text-sm font-bold ${getStokColor(
@@ -267,11 +267,11 @@ export default function StockPage() {
               </table>
             </div>
             {stock.length > 0 && (
-              <div className="px-4 py-3 border-t border-navy-700 text-sm text-navy-400">
+              <div className="px-4 py-3 border-t border-[hsl(var(--border))] text-sm text-[hsl(var(--muted-foreground))]">
                 {stock.length} produk ·{' '}
-                <span className="text-red-400">{stock.filter((s) => s.sisaStok < 0).length} over-sold</span>
+                <span className="text-red-500">{stock.filter((s) => s.sisaStok < 0).length} over-sold</span>
                 {' · '}
-                <span className="text-yellow-400">{stock.filter((s) => s.sisaStok >= 0 && s.sisaStok < 5).length} stok rendah</span>
+                <span className="text-amber-500">{stock.filter((s) => s.sisaStok >= 0 && s.sisaStok < 5).length} stok rendah</span>
               </div>
             )}
           </div>
@@ -281,18 +281,18 @@ export default function StockPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
-          <div className="relative bg-navy-800 border border-navy-700 rounded-xl w-full max-w-lg shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-navy-700">
-              <h4 className="text-lg font-semibold text-white">Tambah Stok Masuk</h4>
-              <button onClick={closeModal} className="p-1 hover:bg-navy-700 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-navy-400" />
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative bg-[hsl(var(--modal-bg))] border border-[hsl(var(--modal-border))] rounded-xl w-full max-w-lg shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
+              <h4 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Tambah Stok Masuk</h4>
+              <button onClick={closeModal} className="p-1 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Venue</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Venue</label>
                 <select
                   value={form.venueId}
                   onChange={(e) => setForm({ ...form, venueId: e.target.value })}
@@ -305,11 +305,11 @@ export default function StockPage() {
                     </option>
                   ))}
                 </select>
-                {errors.venueId && <p className="text-red-400 text-xs mt-1">{errors.venueId}</p>}
+                {errors.venueId && <p className="text-red-500 text-xs mt-1">{errors.venueId}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Produk</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Produk</label>
                 <select
                   value={form.produkId}
                   onChange={(e) => setForm({ ...form, produkId: e.target.value })}
@@ -322,12 +322,12 @@ export default function StockPage() {
                     </option>
                   ))}
                 </select>
-                {errors.produkId && <p className="text-red-400 text-xs mt-1">{errors.produkId}</p>}
+                {errors.produkId && <p className="text-red-500 text-xs mt-1">{errors.produkId}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Qty</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Qty</label>
                   <input
                     type="number"
                     value={form.qty}
@@ -335,10 +335,10 @@ export default function StockPage() {
                     className="input-field"
                     min={1}
                   />
-                  {errors.qty && <p className="text-red-400 text-xs mt-1">{errors.qty}</p>}
+                  {errors.qty && <p className="text-red-500 text-xs mt-1">{errors.qty}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Jenis</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Jenis</label>
                   <select
                     value={form.jenis}
                     onChange={(e) => setForm({ ...form, jenis: e.target.value })}
@@ -352,7 +352,7 @@ export default function StockPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Keterangan (opsional)</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Keterangan (opsional)</label>
                 <input
                   type="text"
                   value={form.keterangan}

@@ -139,20 +139,20 @@ export default function VenueSalesPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-navy-900">Input Penjualan Harian</h1>
-          <p className="text-navy-500 mt-1">Catat penjualan produk setiap hari</p>
+          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Input Penjualan Harian</h1>
+          <p className="text-[hsl(var(--muted-foreground))] mt-1">Catat penjualan produk setiap hari</p>
         </div>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="card">
           <div className="flex items-center gap-2 mb-6">
             <ShoppingCart className="w-5 h-5 text-accent" />
-            <h2 className="text-lg font-semibold text-navy-900">Form Penjualan</h2>
+            <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">Form Penjualan</h2>
           </div>
 
           {/* Date */}
           <div className="mb-6 max-w-xs">
-            <label className="block text-sm font-medium text-navy-700 mb-1">
+            <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">
               Tanggal
             </label>
             <input
@@ -166,7 +166,7 @@ export default function VenueSalesPage() {
 
           {/* Items */}
           <div className="space-y-3 mb-6">
-            <div className="grid grid-cols-12 gap-3 text-xs font-medium text-navy-500 uppercase tracking-wide px-1">
+            <div className="grid grid-cols-12 gap-3 text-xs font-medium text-[hsl(var(--muted-foreground))] uppercase tracking-wide px-1">
               <div className="col-span-5">Produk</div>
               <div className="col-span-2">Qty Terjual</div>
               <div className="col-span-2">Qty Retur</div>
@@ -177,7 +177,7 @@ export default function VenueSalesPage() {
             {items.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-12 gap-3 items-center bg-navy-50/50 rounded-lg p-3"
+                className="grid grid-cols-12 gap-3 items-center bg-[hsl(var(--secondary))]/50 rounded-lg p-3"
               >
                 <div className="col-span-5">
                   <select
@@ -217,7 +217,7 @@ export default function VenueSalesPage() {
                     className="input-field"
                   />
                 </div>
-                <div className="col-span-2 text-right font-medium text-navy-900">
+                <div className="col-span-2 text-right font-medium text-[hsl(var(--foreground))]">
                   {formatRupiah(getItemTotal(item))}
                 </div>
                 <div className="col-span-1 flex justify-end">
@@ -225,7 +225,7 @@ export default function VenueSalesPage() {
                     type="button"
                     onClick={() => removeItem(index)}
                     disabled={items.length <= 1}
-                    className="p-2 text-navy-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 text-[hsl(var(--muted-foreground))] hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                     title="Hapus item"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -236,15 +236,15 @@ export default function VenueSalesPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-4 border-t border-navy-100">
+          <div className="flex items-center justify-between pt-4 border-t border-[hsl(var(--border))]">
             <button type="button" onClick={addItem} className="btn-secondary flex items-center gap-2">
               <Plus className="w-4 h-4" />
               Tambah Item
             </button>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-xs text-navy-500">Total</p>
-                <p className="text-lg font-bold text-navy-900">{formatRupiah(grandTotal)}</p>
+                <p className="text-xs text-[hsl(var(--muted-foreground))]">Total</p>
+                <p className="text-lg font-bold text-[hsl(var(--foreground))]">{formatRupiah(grandTotal)}</p>
               </div>
               <button type="submit" disabled={submitting} className="btn-primary flex items-center gap-2">
                 <Send className={`w-4 h-4 ${submitting ? 'animate-pulse' : ''}`} />
@@ -258,12 +258,12 @@ export default function VenueSalesPage() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Package className="w-5 h-5 text-navy-400" />
-              <h2 className="text-lg font-semibold text-navy-900">Riwayat Penjualan Terakhir</h2>
+              <Package className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+              <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">Riwayat Penjualan Terakhir</h2>
             </div>
             <button
               onClick={fetchRecentSales}
-              className="p-2 text-navy-400 hover:text-navy-600 transition-colors"
+              className="p-2 text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))] transition-colors"
               title="Refresh"
             >
               <RefreshCw className="w-4 h-4" />
@@ -273,11 +273,11 @@ export default function VenueSalesPage() {
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-navy-100 rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[hsl(var(--secondary))] rounded animate-pulse" />
               ))}
             </div>
           ) : recentSales.length === 0 ? (
-            <div className="text-center py-12 text-navy-400">
+            <div className="text-center py-12 text-[hsl(var(--muted-foreground))]">
               <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-50" />
               <p>Belum ada data penjualan</p>
             </div>
@@ -285,38 +285,38 @@ export default function VenueSalesPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-100">
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Tanggal</th>
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Produk</th>
-                    <th className="text-right py-3 px-3 text-navy-500 font-medium">Harga</th>
-                    <th className="text-right py-3 px-3 text-navy-500 font-medium">Qty Terjual</th>
-                    <th className="text-right py-3 px-3 text-navy-500 font-medium">Qty Retur</th>
-                    <th className="text-right py-3 px-3 text-navy-500 font-medium">Total</th>
+                  <tr className="border-b border-[hsl(var(--table-border))]">
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Tanggal</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Harga</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Qty Terjual</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Qty Retur</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentSales.map((sale) => (
-                    <tr key={sale.id} className="border-b border-navy-50 last:border-0 hover:bg-navy-50/50 transition-colors">
-                      <td className="py-3 px-3 text-navy-600">
+                    <tr key={sale.id} className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--table-row-hover))] transition-colors">
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">
                         {formatDate(sale.tanggal)}
                       </td>
-                      <td className="py-3 px-3 font-medium text-navy-800">
+                      <td className="py-3 px-3 font-medium text-[hsl(var(--foreground))]">
                         {sale.produk.nama}
                       </td>
-                      <td className="py-3 px-3 text-right text-navy-600">
+                      <td className="py-3 px-3 text-right text-[hsl(var(--muted-foreground))]">
                         {formatRupiah(sale.produk.hargaJual)}
                       </td>
-                      <td className="py-3 px-3 text-right font-medium text-navy-900">
+                      <td className="py-3 px-3 text-right font-medium text-[hsl(var(--foreground))]">
                         {sale.qtyTerjual}
                       </td>
                       <td className="py-3 px-3 text-right">
                         {sale.qtyRetur > 0 ? (
                           <span className="text-red-500 font-medium">{sale.qtyRetur}</span>
                         ) : (
-                          <span className="text-navy-400">—</span>
+                          <span className="text-[hsl(var(--muted-foreground))]">—</span>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-right font-semibold text-navy-900">
+                      <td className="py-3 px-3 text-right font-semibold text-[hsl(var(--foreground))]">
                         {formatRupiah(sale.totalHarga || 0)}
                       </td>
                     </tr>

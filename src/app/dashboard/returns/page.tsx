@@ -110,7 +110,7 @@ export default function ReturnsPage() {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-[hsl(var(--foreground))] flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-accent" /> Retur Barang
           </h3>
           <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2">
@@ -131,14 +131,14 @@ export default function ReturnsPage() {
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={resetForm}>
             <div className="card w-full max-w-md" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-4">
-                <h4 className="font-semibold text-white">Tambah Retur Barang</h4>
-                <button onClick={resetForm} className="p-1 hover:bg-navy-700 rounded">
-                  <X className="w-5 h-5 text-navy-400" />
+                <h4 className="font-semibold text-[hsl(var(--foreground))]">Tambah Retur Barang</h4>
+                <button onClick={resetForm} className="p-1 hover:bg-[hsl(var(--secondary))] rounded">
+                  <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
                 </button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Venue</label>
+                  <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">Venue</label>
                   <select
                     value={form.venueId}
                     onChange={(e) => setForm({ ...form, venueId: e.target.value })}
@@ -150,10 +150,10 @@ export default function ReturnsPage() {
                       <option key={v.id} value={v.id}>{v.nama}</option>
                     ))}
                   </select>
-                  {errors.venueId && <p className="text-red-400 text-xs mt-1">{errors.venueId}</p>}
+                  {errors.venueId && <p className="text-red-500 text-xs mt-1">{errors.venueId}</p>}
                 </div>
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Produk</label>
+                  <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">Produk</label>
                   <select
                     value={form.produkId}
                     onChange={(e) => setForm({ ...form, produkId: e.target.value })}
@@ -165,10 +165,10 @@ export default function ReturnsPage() {
                       <option key={p.id} value={p.id}>{p.nama} ({p.sku})</option>
                     ))}
                   </select>
-                  {errors.produkId && <p className="text-red-400 text-xs mt-1">{errors.produkId}</p>}
+                  {errors.produkId && <p className="text-red-500 text-xs mt-1">{errors.produkId}</p>}
                 </div>
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Qty</label>
+                  <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">Qty</label>
                   <input
                     type="number"
                     value={form.qty || ''}
@@ -177,10 +177,10 @@ export default function ReturnsPage() {
                     min={1}
                     required
                   />
-                  {errors.qty && <p className="text-red-400 text-xs mt-1">{errors.qty}</p>}
+                  {errors.qty && <p className="text-red-500 text-xs mt-1">{errors.qty}</p>}
                 </div>
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Kondisi</label>
+                  <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">Kondisi</label>
                   <input
                     type="text"
                     value={form.kondisi}
@@ -189,10 +189,10 @@ export default function ReturnsPage() {
                     placeholder="Contoh: Rusak, Expired, Kemasan Sobek"
                     required
                   />
-                  {errors.kondisi && <p className="text-red-400 text-xs mt-1">{errors.kondisi}</p>}
+                  {errors.kondisi && <p className="text-red-500 text-xs mt-1">{errors.kondisi}</p>}
                 </div>
                 <div>
-                  <label className="text-sm text-navy-300 mb-1 block">Alasan</label>
+                  <label className="text-sm text-[hsl(var(--muted-foreground))] mb-1 block">Alasan</label>
                   <input
                     type="text"
                     value={form.alasan}
@@ -201,7 +201,7 @@ export default function ReturnsPage() {
                     placeholder="Alasan retur"
                     required
                   />
-                  {errors.alasan && <p className="text-red-400 text-xs mt-1">{errors.alasan}</p>}
+                  {errors.alasan && <p className="text-red-500 text-xs mt-1">{errors.alasan}</p>}
                 </div>
                 <div className="flex gap-2 pt-2">
                   <button type="submit" className="btn-primary flex-1" disabled={submitting}>
@@ -217,39 +217,39 @@ export default function ReturnsPage() {
         {/* Table */}
         {loading ? (
           <div className="animate-pulse space-y-2">
-            {[1, 2, 3].map((i) => <div key={i} className="card h-16 bg-navy-800" />)}
+            {[1, 2, 3].map((i) => <div key={i} className="card h-16 bg-[hsl(var(--secondary))]" />)}
           </div>
         ) : (
-          <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-x-auto">
+          <div className="bg-[hsl(var(--card))] border border-[hsl(var(--table-border))] rounded-xl overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-navy-700">
-                  <th className="text-left py-3 px-3 text-navy-400 font-medium">Tanggal</th>
-                  <th className="text-left py-3 px-3 text-navy-400 font-medium">Venue</th>
-                  <th className="text-left py-3 px-3 text-navy-400 font-medium">Produk</th>
-                  <th className="text-right py-3 px-3 text-navy-400 font-medium">Qty</th>
-                  <th className="text-left py-3 px-3 text-navy-400 font-medium">Kondisi</th>
-                  <th className="text-left py-3 px-3 text-navy-400 font-medium">Alasan</th>
+                <tr className="border-b border-[hsl(var(--table-border))]">
+                  <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Tanggal</th>
+                  <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Venue</th>
+                  <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                  <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Qty</th>
+                  <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Kondisi</th>
+                  <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Alasan</th>
                 </tr>
               </thead>
               <tbody>
                 {returns.map((r) => (
-                  <tr key={r.id} className="border-b border-navy-700/50 hover:bg-navy-800/50">
-                    <td className="py-3 px-3 text-navy-300">{formatDate(r.tanggal)}</td>
-                    <td className="py-3 px-3 text-white">{r.venue?.nama}</td>
+                  <tr key={r.id} className="border-b border-[hsl(var(--table-border))]/50 hover:bg-[hsl(var(--table-row-hover))]">
+                    <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{formatDate(r.tanggal)}</td>
+                    <td className="py-3 px-3 text-[hsl(var(--foreground))]">{r.venue?.nama}</td>
                     <td className="py-3 px-3">
-                      <p className="text-white">{r.produk?.nama}</p>
-                      <p className="text-navy-500 text-xs font-mono">{r.produk?.sku}</p>
+                      <p className="text-[hsl(var(--foreground))]">{r.produk?.nama}</p>
+                      <p className="text-[hsl(var(--muted-foreground))] text-xs font-mono">{r.produk?.sku}</p>
                     </td>
-                    <td className="py-3 px-3 text-right text-yellow-400 font-medium">{r.qty}</td>
-                    <td className="py-3 px-3 text-navy-300">{r.kondisi}</td>
-                    <td className="py-3 px-3 text-navy-400">{r.alasan}</td>
+                    <td className="py-3 px-3 text-right text-amber-500 font-medium">{r.qty}</td>
+                    <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{r.kondisi}</td>
+                    <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{r.alasan}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
             {returns.length === 0 && (
-              <p className="text-center text-navy-500 py-12">Belum ada data retur</p>
+              <p className="text-center text-[hsl(var(--muted-foreground))] py-12">Belum ada data retur</p>
             )}
           </div>
         )}

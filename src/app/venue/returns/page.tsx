@@ -47,19 +47,19 @@ export default function VenueReturnsPage() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-navy-900">Retur Produk</h1>
-          <p className="text-navy-500 mt-1">Daftar retur produk yang tercatat</p>
+          <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Retur Produk</h1>
+          <p className="text-[hsl(var(--muted-foreground))] mt-1">Daftar retur produk yang tercatat</p>
         </div>
 
         {/* Info Banner */}
-        <div className="card border-l-4 border-blue-500 bg-blue-50">
+        <div className="card border-l-4 border-blue-500 bg-blue-500/5">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+            <Info className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-blue-800">
+              <p className="text-sm font-medium text-blue-500">
                 Pengajuan Retur
               </p>
-              <p className="text-sm text-blue-700 mt-1">
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-1">
                 Venue tidak dapat mengajukan retur langsung melalui sistem. Untuk mengajukan retur
                 produk, silakan hubungi admin melalui kontak yang tersedia.
               </p>
@@ -71,8 +71,8 @@ export default function VenueReturnsPage() {
         <div className="card">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-navy-400" />
-              <h2 className="text-lg font-semibold text-navy-900">Riwayat Retur</h2>
+              <RotateCcw className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
+              <h2 className="text-lg font-semibold text-[hsl(var(--foreground))]">Riwayat Retur</h2>
             </div>
             <button
               onClick={fetchReturns}
@@ -87,11 +87,11 @@ export default function VenueReturnsPage() {
           {loading ? (
             <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-navy-100 rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[hsl(var(--secondary))] rounded animate-pulse" />
               ))}
             </div>
           ) : returns.length === 0 ? (
-            <div className="text-center py-16 text-navy-400">
+            <div className="text-center py-16 text-[hsl(var(--muted-foreground))]">
               <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
               <p className="font-medium">Belum ada data retur</p>
               <p className="text-sm mt-1">Retur akan muncul di sini setelah diproses oleh admin</p>
@@ -100,33 +100,33 @@ export default function VenueReturnsPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-100">
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Tanggal</th>
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Produk</th>
-                    <th className="text-right py-3 px-3 text-navy-500 font-medium">Qty</th>
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Kondisi</th>
-                    <th className="text-left py-3 px-3 text-navy-500 font-medium">Alasan</th>
+                  <tr className="border-b border-[hsl(var(--table-border))]">
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Tanggal</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Produk</th>
+                    <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">Qty</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Kondisi</th>
+                    <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">Alasan</th>
                   </tr>
                 </thead>
                 <tbody>
                   {returns.map((ret) => (
                     <tr
                       key={ret.id}
-                      className="border-b border-navy-50 last:border-0 hover:bg-navy-50/50 transition-colors"
+                      className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--table-row-hover))] transition-colors"
                     >
-                      <td className="py-3 px-3 text-navy-600">{formatDate(ret.tanggal)}</td>
-                      <td className="py-3 px-3 font-medium text-navy-800">
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">{formatDate(ret.tanggal)}</td>
+                      <td className="py-3 px-3 font-medium text-[hsl(var(--foreground))]">
                         {ret.produk.nama}
                       </td>
-                      <td className="py-3 px-3 text-right font-medium text-navy-900">
+                      <td className="py-3 px-3 text-right font-medium text-[hsl(var(--foreground))]">
                         {ret.qty}
                       </td>
                       <td className="py-3 px-3">
-                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-navy-100 text-navy-700">
+                        <span className="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-[hsl(var(--secondary))] text-[hsl(var(--foreground))]">
                           {ret.kondisi || '—'}
                         </span>
                       </td>
-                      <td className="py-3 px-3 text-navy-600 max-w-xs truncate">
+                      <td className="py-3 px-3 text-[hsl(var(--muted-foreground))] max-w-xs truncate">
                         {ret.alasan || '—'}
                       </td>
                     </tr>

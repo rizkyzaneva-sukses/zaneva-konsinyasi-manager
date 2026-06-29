@@ -147,10 +147,10 @@ export default function VenuesPage() {
       <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <h3 className="text-lg font-semibold text-white">Daftar Venue</h3>
+          <h3 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">Daftar Venue</h3>
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:flex-initial">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-navy-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[hsl(var(--muted-foreground))]" />
               <input
                 type="text"
                 placeholder="Cari venue..."
@@ -169,54 +169,54 @@ export default function VenuesPage() {
         {loading ? (
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-16 bg-navy-800/50 border border-navy-700 rounded-xl animate-pulse" />
+              <div key={i} className="h-16 card animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="bg-navy-800/50 border border-navy-700 rounded-xl overflow-hidden">
+          <div className="card overflow-hidden p-0">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-navy-700">
-                    <th className="text-left py-3 px-4 text-navy-400 font-medium">Nama</th>
-                    <th className="text-left py-3 px-4 text-navy-400 font-medium">Alamat</th>
-                    <th className="text-left py-3 px-4 text-navy-400 font-medium">PIC</th>
-                    <th className="text-center py-3 px-4 text-navy-400 font-medium">Status</th>
-                    <th className="text-right py-3 px-4 text-navy-400 font-medium">Margin%</th>
-                    <th className="text-center py-3 px-4 text-navy-400 font-medium">Aksi</th>
+                  <tr className="border-b border-[hsl(var(--border))]">
+                    <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Nama</th>
+                    <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">Alamat</th>
+                    <th className="text-left py-3 px-4 text-[hsl(var(--table-header))] font-medium">PIC</th>
+                    <th className="text-center py-3 px-4 text-[hsl(var(--table-header))] font-medium">Status</th>
+                    <th className="text-right py-3 px-4 text-[hsl(var(--table-header))] font-medium">Margin%</th>
+                    <th className="text-center py-3 px-4 text-[hsl(var(--table-header))] font-medium">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredVenues.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-12 text-navy-400">
+                      <td colSpan={6} className="text-center py-12 text-[hsl(var(--muted-foreground))]">
                         {search ? 'Venue tidak ditemukan' : 'Belum ada data venue'}
                       </td>
                     </tr>
                   ) : (
                     filteredVenues.map((v) => (
-                      <tr key={v.id} className="border-b border-navy-700/50 hover:bg-navy-700/30 transition-colors">
+                      <tr key={v.id} className="border-b border-[hsl(var(--table-border))] hover:bg-[hsl(var(--table-row-hover))] transition-colors">
                         <td className="py-3 px-4">
-                          <span className="text-white font-medium">{v.nama}</span>
+                          <span className="text-[hsl(var(--foreground))] font-medium">{v.nama}</span>
                         </td>
-                        <td className="py-3 px-4 text-navy-300 max-w-[200px] truncate">{v.alamat}</td>
+                        <td className="py-3 px-4 text-[hsl(var(--muted-foreground))] max-w-[200px] truncate">{v.alamat}</td>
                         <td className="py-3 px-4">
-                          <div className="text-white">{v.picNama}</div>
-                          <div className="text-xs text-navy-400">{v.picKontakWa}</div>
+                          <div className="text-[hsl(var(--foreground))]">{v.picNama}</div>
+                          <div className="text-xs text-[hsl(var(--muted-text))]">{v.picKontakWa}</div>
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span className={`badge ${getStatusColor(v.status)}`}>
                             {getStatusLabel(v.status)}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-right text-navy-300">{v.marginPersenZaneva}%</td>
+                        <td className="py-3 px-4 text-right text-[hsl(var(--muted-foreground))]">{v.marginPersenZaneva}%</td>
                         <td className="py-3 px-4 text-center">
                           <button
                             onClick={() => openEditModal(v)}
-                            className="p-2 hover:bg-navy-700 rounded-lg transition-colors"
+                            className="p-2 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors"
                             title="Edit venue"
                           >
-                            <Edit2 className="w-4 h-4 text-navy-400 hover:text-white" />
+                            <Edit2 className="w-4 h-4 text-[hsl(var(--muted-foreground))]" />
                           </button>
                         </td>
                       </tr>
@@ -226,7 +226,7 @@ export default function VenuesPage() {
               </table>
             </div>
             {filteredVenues.length > 0 && (
-              <div className="px-4 py-3 border-t border-navy-700 text-sm text-navy-400">
+              <div className="px-4 py-3 border-t border-[hsl(var(--border))] text-sm text-[hsl(var(--muted-foreground))]">
                 Menampilkan {filteredVenues.length} dari {venues.length} venue
               </div>
             )}
@@ -237,20 +237,20 @@ export default function VenuesPage() {
       {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closeModal} />
-          <div className="relative bg-navy-800 border border-navy-700 rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between p-5 border-b border-navy-700">
-              <h4 className="text-lg font-semibold text-white">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModal} />
+          <div className="relative bg-[hsl(var(--modal-bg))] border border-[hsl(var(--modal-border))] rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-[hsl(var(--border))]">
+              <h4 className="text-lg font-semibold font-display text-[hsl(var(--foreground))]">
                 {editingId ? 'Edit Venue' : 'Tambah Venue'}
               </h4>
-              <button onClick={closeModal} className="p-1 hover:bg-navy-700 rounded-lg transition-colors">
-                <X className="w-5 h-5 text-navy-400" />
+              <button onClick={closeModal} className="p-1 hover:bg-[hsl(var(--surface-hover))] rounded-lg transition-colors">
+                <X className="w-5 h-5 text-[hsl(var(--muted-foreground))]" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Nama Venue</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Nama Venue</label>
                 <input
                   type="text"
                   value={form.nama}
@@ -258,23 +258,23 @@ export default function VenuesPage() {
                   className="input-field"
                   placeholder="Masukkan nama venue"
                 />
-                {errors.nama && <p className="text-red-400 text-xs mt-1">{errors.nama}</p>}
+                {errors.nama && <p className="text-red-500 text-xs mt-1">{errors.nama}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Alamat</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Alamat</label>
                 <textarea
                   value={form.alamat}
                   onChange={(e) => setForm({ ...form, alamat: e.target.value })}
                   className="input-field min-h-[80px] resize-y"
                   placeholder="Masukkan alamat venue"
                 />
-                {errors.alamat && <p className="text-red-400 text-xs mt-1">{errors.alamat}</p>}
+                {errors.alamat && <p className="text-red-500 text-xs mt-1">{errors.alamat}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Nama PIC</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Nama PIC</label>
                   <input
                     type="text"
                     value={form.picNama}
@@ -282,10 +282,10 @@ export default function VenuesPage() {
                     className="input-field"
                     placeholder="Nama penanggung jawab"
                   />
-                  {errors.picNama && <p className="text-red-400 text-xs mt-1">{errors.picNama}</p>}
+                  {errors.picNama && <p className="text-red-500 text-xs mt-1">{errors.picNama}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Kontak WA PIC</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Kontak WA PIC</label>
                   <input
                     type="text"
                     value={form.picKontakWa}
@@ -293,13 +293,13 @@ export default function VenuesPage() {
                     className="input-field"
                     placeholder="08xxxxxxxxxx"
                   />
-                  {errors.picKontakWa && <p className="text-red-400 text-xs mt-1">{errors.picKontakWa}</p>}
+                  {errors.picKontakWa && <p className="text-red-500 text-xs mt-1">{errors.picKontakWa}</p>}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Status</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Status</label>
                   <select
                     value={form.status}
                     onChange={(e) => setForm({ ...form, status: e.target.value })}
@@ -312,7 +312,7 @@ export default function VenuesPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-navy-300 mb-1">Margin Zaneva (%)</label>
+                  <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Margin Zaneva (%)</label>
                   <input
                     type="number"
                     value={form.marginPersenZaneva}
@@ -326,7 +326,7 @@ export default function VenuesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-navy-300 mb-1">Periode Settlement (hari)</label>
+                <label className="block text-sm font-medium text-[hsl(var(--foreground))] mb-1">Periode Settlement (hari)</label>
                 <input
                   type="number"
                   value={form.periodeSettlementHari}

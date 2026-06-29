@@ -24,14 +24,15 @@ const config: Config = {
           950: '#080f24',
         },
         accent: {
-          DEFAULT: '#4ade80',
+          DEFAULT: 'hsl(var(--accent))',
           light: '#86efac',
           dark: '#16a34a',
         },
       },
       fontFamily: {
-        sans: ['Geist Mono', 'ui-monospace', 'monospace'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
       },
     },
   },

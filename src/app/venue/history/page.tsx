@@ -162,8 +162,8 @@ export default function VenueHistoryPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-navy-900">Riwayat</h1>
-            <p className="text-navy-500 mt-1">Catatan stok, penjualan, dan invoice</p>
+            <h1 className="text-2xl font-bold text-[hsl(var(--foreground))]">Riwayat</h1>
+            <p className="text-[hsl(var(--muted-foreground))] mt-1">Catatan stok, penjualan, dan invoice</p>
           </div>
           <button
             onClick={handleRefresh}
@@ -176,15 +176,15 @@ export default function VenueHistoryPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-navy-100 rounded-lg p-1">
+        <div className="flex gap-1 bg-[hsl(var(--secondary))] rounded-lg p-1">
           {TABS.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-all ${
                 activeTab === tab.key
-                  ? 'bg-white text-navy-900 shadow-sm'
-                  : 'text-navy-500 hover:text-navy-700'
+                  ? 'bg-[hsl(var(--card))] text-[hsl(var(--foreground))] shadow-sm'
+                  : 'text-[hsl(var(--muted-foreground))] hover:text-[hsl(var(--foreground))]'
               }`}
             >
               <tab.icon className="w-4 h-4" />
@@ -198,7 +198,7 @@ export default function VenueHistoryPage() {
           {loading ? (
             <div className="space-y-3">
               {[...Array(8)].map((_, i) => (
-                <div key={i} className="h-12 bg-navy-100 rounded animate-pulse" />
+                <div key={i} className="h-12 bg-[hsl(var(--secondary))] rounded animate-pulse" />
               ))}
             </div>
           ) : (
@@ -207,7 +207,7 @@ export default function VenueHistoryPage() {
               {activeTab === 'stock' && (
                 <>
                   {stockItems.length === 0 ? (
-                    <div className="text-center py-16 text-navy-400">
+                    <div className="text-center py-16 text-[hsl(var(--muted-foreground))]">
                       <Package className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p className="font-medium">Belum ada data stok</p>
                     </div>
@@ -215,23 +215,23 @@ export default function VenueHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-navy-100">
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                          <tr className="border-b border-[hsl(var(--table-border))]">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Produk
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Harga Jual
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Stok Saat Ini
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Stok Minimum
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Status
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Terakhir Diperbarui
                             </th>
                           </tr>
@@ -242,33 +242,33 @@ export default function VenueHistoryPage() {
                             return (
                               <tr
                                 key={item.id}
-                                className="border-b border-navy-50 last:border-0 hover:bg-navy-50/50 transition-colors"
+                                className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--table-row-hover))] transition-colors"
                               >
-                                <td className="py-3 px-3 font-medium text-navy-800">
+                                <td className="py-3 px-3 font-medium text-[hsl(var(--foreground))]">
                                   {item.produk.nama}
                                 </td>
-                                <td className="py-3 px-3 text-right text-navy-600">
+                                <td className="py-3 px-3 text-right text-[hsl(var(--muted-foreground))]">
                                   {formatRupiah(item.produk.hargaJual)}
                                 </td>
-                                <td className="py-3 px-3 text-right font-semibold text-navy-900">
+                                <td className="py-3 px-3 text-right font-semibold text-[hsl(var(--foreground))]">
                                   {item.qty}
                                 </td>
-                                <td className="py-3 px-3 text-right text-navy-500">
+                                <td className="py-3 px-3 text-right text-[hsl(var(--muted-foreground))]">
                                   {item.qtyMinimum}
                                 </td>
                                 <td className="py-3 px-3 text-right">
                                   {isLow ? (
-                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">
                                       <AlertTriangle className="w-3 h-3" />
                                       Rendah
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-50 px-2 py-0.5 rounded-full">
+                                    <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                                       Aman
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-3 px-3 text-right text-navy-500 text-xs">
+                                <td className="py-3 px-3 text-right text-[hsl(var(--muted-foreground))] text-xs">
                                   {formatDate(item.updatedAt)}
                                 </td>
                               </tr>
@@ -285,7 +285,7 @@ export default function VenueHistoryPage() {
               {activeTab === 'sales' && (
                 <>
                   {sales.length === 0 ? (
-                    <div className="text-center py-16 text-navy-400">
+                    <div className="text-center py-16 text-[hsl(var(--muted-foreground))]">
                       <ShoppingCart className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p className="font-medium">Belum ada data penjualan</p>
                     </div>
@@ -293,23 +293,23 @@ export default function VenueHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-navy-100">
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                          <tr className="border-b border-[hsl(var(--table-border))]">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Tanggal
                             </th>
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Produk
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Harga
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Qty Terjual
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Qty Retur
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Total
                             </th>
                           </tr>
@@ -318,28 +318,28 @@ export default function VenueHistoryPage() {
                           {sales.map((sale) => (
                             <tr
                               key={sale.id}
-                              className="border-b border-navy-50 last:border-0 hover:bg-navy-50/50 transition-colors"
+                              className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--table-row-hover))] transition-colors"
                             >
-                              <td className="py-3 px-3 text-navy-600">
+                              <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">
                                 {formatDate(sale.tanggal)}
                               </td>
-                              <td className="py-3 px-3 font-medium text-navy-800">
+                              <td className="py-3 px-3 font-medium text-[hsl(var(--foreground))]">
                                 {sale.produk.nama}
                               </td>
-                              <td className="py-3 px-3 text-right text-navy-600">
+                              <td className="py-3 px-3 text-right text-[hsl(var(--muted-foreground))]">
                                 {formatRupiah(sale.produk.hargaJual)}
                               </td>
-                              <td className="py-3 px-3 text-right font-medium text-navy-900">
+                              <td className="py-3 px-3 text-right font-medium text-[hsl(var(--foreground))]">
                                 {sale.qtyTerjual}
                               </td>
                               <td className="py-3 px-3 text-right">
                                 {sale.qtyRetur > 0 ? (
                                   <span className="text-red-500 font-medium">{sale.qtyRetur}</span>
                                 ) : (
-                                  <span className="text-navy-400">—</span>
+                                  <span className="text-[hsl(var(--muted-foreground))]">—</span>
                                 )}
                               </td>
-                              <td className="py-3 px-3 text-right font-semibold text-navy-900">
+                              <td className="py-3 px-3 text-right font-semibold text-[hsl(var(--foreground))]">
                                 {formatRupiah(sale.totalHarga || 0)}
                               </td>
                             </tr>
@@ -355,7 +355,7 @@ export default function VenueHistoryPage() {
               {activeTab === 'invoices' && (
                 <>
                   {invoices.length === 0 ? (
-                    <div className="text-center py-16 text-navy-400">
+                    <div className="text-center py-16 text-[hsl(var(--muted-foreground))]">
                       <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p className="font-medium">Belum ada invoice</p>
                     </div>
@@ -363,20 +363,20 @@ export default function VenueHistoryPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-navy-100">
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                          <tr className="border-b border-[hsl(var(--table-border))]">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               No. Invoice
                             </th>
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Tanggal
                             </th>
-                            <th className="text-left py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-left py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Jatuh Tempo
                             </th>
-                            <th className="text-right py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-right py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Total
                             </th>
-                            <th className="text-center py-3 px-3 text-navy-500 font-medium">
+                            <th className="text-center py-3 px-3 text-[hsl(var(--table-header))] font-medium">
                               Status
                             </th>
                           </tr>
@@ -385,18 +385,18 @@ export default function VenueHistoryPage() {
                           {invoices.map((inv) => (
                             <tr
                               key={inv.id}
-                              className="border-b border-navy-50 last:border-0 hover:bg-navy-50/50 transition-colors"
+                              className="border-b border-[hsl(var(--border))] last:border-0 hover:bg-[hsl(var(--table-row-hover))] transition-colors"
                             >
-                              <td className="py-3 px-3 font-medium text-navy-800">
+                              <td className="py-3 px-3 font-medium text-[hsl(var(--foreground))]">
                                 {inv.nomor}
                               </td>
-                              <td className="py-3 px-3 text-navy-600">
+                              <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">
                                 {formatDate(inv.tanggal)}
                               </td>
-                              <td className="py-3 px-3 text-navy-600">
+                              <td className="py-3 px-3 text-[hsl(var(--muted-foreground))]">
                                 {formatDate(inv.jatuhTempo)}
                               </td>
-                              <td className="py-3 px-3 text-right font-semibold text-navy-900">
+                              <td className="py-3 px-3 text-right font-semibold text-[hsl(var(--foreground))]">
                                 {formatRupiah(inv.total)}
                               </td>
                               <td className="py-3 px-3 text-center">
@@ -420,8 +420,8 @@ export default function VenueHistoryPage() {
               {/* Pagination */}
               {(activeTab === 'sales' || activeTab === 'invoices') &&
                 pagination.totalPages > 1 && (
-                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-navy-100">
-                    <p className="text-sm text-navy-500">
+                  <div className="flex items-center justify-between mt-6 pt-4 border-t border-[hsl(var(--border))]">
+                    <p className="text-sm text-[hsl(var(--muted-foreground))]">
                       Halaman {pagination.page} dari {pagination.totalPages} · Total{' '}
                       {pagination.total} data
                     </p>
@@ -452,7 +452,7 @@ export default function VenueHistoryPage() {
                               className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
                                 pageNum === pagination.page
                                   ? 'bg-accent text-white'
-                                  : 'text-navy-600 hover:bg-navy-100'
+                                  : 'text-[hsl(var(--foreground))] hover:bg-[hsl(var(--secondary))]'
                               }`}
                             >
                               {pageNum}
