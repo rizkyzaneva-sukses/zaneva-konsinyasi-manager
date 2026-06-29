@@ -60,6 +60,16 @@ docker compose exec app npx tsx prisma/seed.ts
 - **Staff Operasional**: menjalankan pekerjaan harian seperti input stok, penjualan, retur, draft invoice, catat pembayaran, export laporan, dan monitoring venue.
 - **Venue**: akun partner eksternal untuk input penjualan/retur dan melihat riwayat venue sendiri.
 
+## User & Password Venue
+
+Owner/Admin memiliki menu **Users** untuk:
+
+- Menambah akun **Staff Operasional**.
+- Menambah akun **Venue** dan menghubungkannya ke data venue tertentu.
+- Mengganti/reset password Staff atau Venue.
+
+Menu **Venue** dipakai untuk data toko/partner, sedangkan username/password login venue diatur dari menu **Users**.
+
 ## Catatan Alur Data
 
 - Stok venue dihitung dari `DROP_AWAL + RESTOCK - PENARIKAN - PENJUALAN - RETUR`.

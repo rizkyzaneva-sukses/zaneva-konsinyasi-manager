@@ -263,6 +263,24 @@ export default function PanduanPage() {
 
             <GuideSection
               icon={Shield}
+              title="User & Password Venue"
+              color="#2563eb"
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                Owner/Admin mengatur akun login Staff dan Venue dari menu Users.
+              </p>
+              <Steps>
+                <Step num={1} title="Tambah Staff" desc="Buka Users → Tambah User → pilih role Staff Operasional → isi username dan password." />
+                <Step num={2} title="Tambah Akun Venue" desc="Buka Users → Tambah User → pilih role Venue → pilih venue terkait → isi username dan password untuk venue tersebut." />
+                <Step num={3} title="Reset Password" desc="Klik edit pada user, isi password baru, lalu simpan. Kosongkan password jika tidak ingin mengganti." />
+              </Steps>
+              <TipBox type="info">
+                Menu Venue dipakai untuk data toko/partner. Password login venue diatur dari menu Users.
+              </TipBox>
+            </GuideSection>
+
+            <GuideSection
+              icon={Shield}
               title="Owner Settings: Dummy & Reset Trial"
               color="#ef4444"
             >
