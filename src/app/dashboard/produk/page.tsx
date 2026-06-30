@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { formatRupiah } from '@/lib/utils';
 import { produkSchema } from '@/lib/validations';
-import { Plus, Edit2, X, Loader2, Search } from 'lucide-react';
+import { Plus, Edit2, X, Loader2, Search, Upload, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Produk {
@@ -32,6 +32,8 @@ export default function ProdukPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [search, setSearch] = useState('');
   const [form, setForm] = useState(defaultForm);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchProduks = useCallback(async () => {
     try {
@@ -125,6 +127,58 @@ export default function ProdukPage() {
     }
   };
 
+  const handleExport = async () => {
+    try {
+      const res = await fetch('/api/produk/export');
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `produk_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('File berhasil diunduh');
+    } catch {
+      toast.error('Gagal mengunduh file');
+    }
+  };
+
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      toast.error('File harus berformat CSV');
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/produk/import', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        toast.success(data.message || 'Import berhasil');
+        fetchProduks();
+      } else {
+        toast.error(data.error || 'Gagal import data');
+      }
+    } catch {
+      toast.error('Terjadi kesalahan koneksi');
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const filteredProduks = produks.filter(
     (p) =>
       p.nama.toLowerCase().includes(search.toLowerCase()) ||
@@ -149,6 +203,24 @@ export default function ProdukPage() {
                 className="input-field pl-10 w-full sm:w-64"
               />
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv"
+              onChange={handleImport}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={importing}
+              className="btn-secondary flex items-center gap-2 whitespace-nowrap"
+            >
+              {importing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              Import CSV
+            </button>
+            <button onClick={handleExport} className="btn-secondary flex items-center gap-2 whitespace-nowrap">
+              <Download className="w-4 h-4" /> Download
+            </button>
             <button onClick={openAddModal} className="btn-primary flex items-center gap-2 whitespace-nowrap">
               <Plus className="w-4 h-4" /> Tambah Produk
             </button>
