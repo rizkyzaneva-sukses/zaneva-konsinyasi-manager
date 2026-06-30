@@ -10,8 +10,10 @@ export async function GET(request: NextRequest) {
     const session = await requireRole('ADMIN', 'STAFF', 'VENUE');
     const { searchParams } = new URL(request.url);
     const venueId = searchParams.get('venueId');
-    const limit = parseInt(searchParams.get('limit') || '50');
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const rawLimit = parseInt(searchParams.get('limit') || '50');
+    const rawOffset = parseInt(searchParams.get('offset') || '0');
+    const limit = Math.min(Math.max(1, isNaN(rawLimit) ? 50 : rawLimit), 100);
+    const offset = Math.max(0, isNaN(rawOffset) ? 0 : rawOffset);
 
     const where: Record<string, unknown> = {};
 

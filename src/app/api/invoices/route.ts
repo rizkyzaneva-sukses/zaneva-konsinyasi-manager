@@ -24,14 +24,13 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
     if (from || to) {
-      const createdAt: { gte?: Date; lte?: Date } = {};
-      if (from) createdAt.gte = new Date(from);
-      if (to) {
-        const end = new Date(to);
-        end.setHours(23, 59, 59, 999);
-        createdAt.lte = end;
+      where.AND = Array.isArray(where.AND) ? where.AND : [];
+      if (from) {
+        where.AND.push({ periodeMulai: { gte: new Date(from) } });
       }
-      where.createdAt = createdAt;
+      if (to) {
+        where.AND.push({ periodeAkhir: { lte: new Date(to) } });
+      }
     }
 
     const invoices = await prisma.invoice.findMany({
@@ -70,6 +69,13 @@ export async function POST(request: NextRequest) {
 
     if (!venue) {
       return NextResponse.json({ success: false, error: 'Venue tidak ditemukan' }, { status: 404 });
+    }
+
+    if (venue.status !== 'AKTIF') {
+      return NextResponse.json(
+        { success: false, error: `Venue "${venue.nama}" tidak aktif (status: ${venue.status})` },
+        { status: 400 }
+      );
     }
 
     const existingInvoice = await prisma.invoice.findFirst({
@@ -166,7 +172,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Webhook: invoice terbit
-    sendWebhook('INVOICE_TERBIT', {
+    await sendWebhook('INVOICE_TERBIT', {
       invoiceId: invoice.id,
       venueNama: venue.nama,
       totalTagihan,

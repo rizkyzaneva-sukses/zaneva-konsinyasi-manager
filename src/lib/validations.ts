@@ -50,7 +50,7 @@ export const laporanPenjualanSchema = z.object({
 // Pembayaran
 export const pembayaranSchema = z.object({
   invoiceId: z.string().uuid(),
-  jumlah: z.number().min(1, 'Jumlah harus lebih dari 0'),
+  jumlah: z.number().int('Jumlah harus bilangan bulat').min(1, 'Jumlah harus lebih dari 0'),
   keterangan: z.string().optional(),
 });
 
@@ -87,18 +87,18 @@ export const posOrderSchema = z.object({
   items: z.array(z.object({
     produkId: z.string().uuid(),
     qty: z.number().min(1),
-    harga: z.number().min(0),
-    basePrice: z.number().min(0),
-    diskonAmount: z.number().min(0).optional(),
+    harga: z.number().int().min(0),
+    basePrice: z.number().int().min(0),
+    diskonAmount: z.number().int().min(0).optional(),
   })).min(1),
   payments: z.array(z.object({
     method: z.string(),
-    amount: z.number().min(0),
+    amount: z.number().int().min(0),
     referenceNo: z.string().optional(),
   })).min(1),
   customerName: z.string().optional(),
   customerPhone: z.string().optional(),
-  diskonTotal: z.number().min(0).optional(),
+  diskonTotal: z.number().int().min(0).optional(),
   notes: z.string().optional(),
   cashierName: z.string().optional(),
 });

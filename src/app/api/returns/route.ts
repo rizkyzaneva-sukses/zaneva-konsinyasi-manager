@@ -4,7 +4,6 @@ import { requireRole } from '@/lib/session';
 import { returSchema } from '@/lib/validations';
 import { createAuditLog } from '@/lib/audit';
 import { sendWebhook } from '@/lib/webhook';
-import { calculateStok } from '@/lib/stock';
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,11 +39,22 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const data = returSchema.parse(body);
 
-    const stok = await calculateStok(data.venueId, data.produkId);
-    if (stok < data.qty) {
+    // Returns add stock back — validate qty doesn't exceed what was delivered minus already returned
+    const [totalDelivered, totalAlreadyReturned] = await Promise.all([
+      prisma.stokMasuk.aggregate({
+        where: { venueId: data.venueId, produkId: data.produkId, jenis: { not: 'PENARIKAN' } },
+        _sum: { qty: true },
+      }),
+      prisma.returBarang.aggregate({
+        where: { venueId: data.venueId, produkId: data.produkId },
+        _sum: { qty: true },
+      }),
+    ]);
+    const maxReturnable = (totalDelivered._sum.qty || 0) - (totalAlreadyReturned._sum.qty || 0);
+    if (data.qty > maxReturnable) {
       const produk = await prisma.produk.findUnique({ where: { id: data.produkId } });
       return NextResponse.json(
-        { success: false, error: `Stok ${produk?.nama || 'produk'} tidak cukup. Sisa stok: ${stok}` },
+        { success: false, error: `Qty return (${data.qty}) melebihi yang bisa dikembalikan (${maxReturnable}) untuk ${produk?.nama || 'produk'}` },
         { status: 400 }
       );
     }
@@ -70,7 +80,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Webhook: retur diproses
-    sendWebhook('RETUR_DIPROSES', {
+    await sendWebhook('RETUR_DIPROSES', {
       venueNama: retur.venue.nama,
       produkNama: retur.produk.nama,
       qty: retur.qty,

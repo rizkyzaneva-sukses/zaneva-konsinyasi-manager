@@ -126,13 +126,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (needsVerification) {
-      sendWebhook('PEMBAYARAN_MENUNGGU_VERIFIKASI', {
+      await sendWebhook('PEMBAYARAN_MENUNGGU_VERIFIKASI', {
         invoiceId: invoice.id,
         venueNama: invoice.venue.nama,
         jumlah: data.jumlah,
       });
     } else {
-      sendWebhook('PEMBAYARAN_DITERIMA', {
+      await sendWebhook('PEMBAYARAN_DITERIMA', {
         invoiceId: invoice.id,
         venueNama: invoice.venue.nama,
         jumlah: data.jumlah,

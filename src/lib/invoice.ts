@@ -31,13 +31,30 @@ export function getInvoiceNumber(invoice: InvoiceLike): string {
 
 export async function generateInvoiceNumber(): Promise<string> {
   const now = new Date();
-  const start = new Date(now.getFullYear(), 0, 1);
-  const end = new Date(now.getFullYear() + 1, 0, 1);
-  const count = await prisma.invoice.count({
-    where: { createdAt: { gte: start, lt: end } },
-  });
+  const year = now.getFullYear();
 
-  return `ZKM-${now.getFullYear()}-${String(count + 1).padStart(4, '0')}`;
+  // Use a transaction with row-level lock to prevent race conditions
+  return prisma.$transaction(async (tx) => {
+    // Find the highest invoice number for this year
+    const lastInvoice = await tx.invoice.findFirst({
+      where: {
+        noInvoice: { startsWith: `ZKM-${year}-` },
+      },
+      orderBy: { noInvoice: 'desc' },
+      select: { noInvoice: true },
+    });
+
+    let nextSeq = 1;
+    if (lastInvoice?.noInvoice) {
+      const parts = lastInvoice.noInvoice.split('-');
+      const lastSeq = parseInt(parts[parts.length - 1], 10);
+      if (!isNaN(lastSeq)) {
+        nextSeq = lastSeq + 1;
+      }
+    }
+
+    return `ZKM-${year}-${String(nextSeq).padStart(4, '0')}`;
+  });
 }
 
 export function presentInvoice<T extends InvoiceLike>(invoice: T) {

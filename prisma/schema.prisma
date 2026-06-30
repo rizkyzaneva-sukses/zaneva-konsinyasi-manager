@@ -48,8 +48,10 @@ model User {
   id           String   @id @default(uuid()) @db.Uuid
   nama         String
   username     String   @unique
-  passwordHash String
-  role         Role
+  passwordHash    String
+  role            Role
+  resetOtpHash    String?
+  resetOtpExpiry  DateTime?
   venueId      String?  @db.Uuid
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

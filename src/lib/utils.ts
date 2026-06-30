@@ -71,6 +71,7 @@ export function generateOrderNo(): string {
   const pad = (n: number, l = 2) => String(n).padStart(l, '0');
   const datePart = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
   const timePart = `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-  const rand = Math.random().toString(16).slice(2, 7).toUpperCase();
+  // Use crypto for better randomness (8 hex chars = 4B combinations)
+  const rand = crypto.randomBytes(4).toString('hex').toUpperCase();
   return `POS-${datePart}-${timePart}-${rand}`;
 }

@@ -37,17 +37,22 @@ export async function GET() {
       }),
     ]);
 
-    // Get low stock venues
+    // Get low stock venues — fetch all in parallel
     const venues = await prisma.venue.findMany({ where: { status: 'AKTIF' } });
+
+    const stockResults = await Promise.all(
+      venues.map(async (venue) => {
+        const stockRows = await getVenueStock(venue.id);
+        return { venueNama: venue.nama, stockRows };
+      })
+    );
+
     const stokRendah: DashboardStats['stokRendah'] = [];
-
-    for (const venue of venues) {
-      const stockRows = await getVenueStock(venue.id);
-
+    for (const { venueNama, stockRows } of stockResults) {
       for (const row of stockRows) {
         if (row.sisaStok <= 5) {
           stokRendah.push({
-            venueNama: venue.nama,
+            venueNama,
             produkNama: row.produkNama,
             sisaStok: row.sisaStok,
           });

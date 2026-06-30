@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       dataSesudah: updated,
     });
 
-    sendWebhook(action === 'approve' ? 'PEMBAYARAN_DIVERIFIKASI' : 'PEMBAYARAN_DITOLAK', {
+    await sendWebhook(action === 'approve' ? 'PEMBAYARAN_DIVERIFIKASI' : 'PEMBAYARAN_DITOLAK', {
       invoiceId: payment.invoiceId,
       venueNama: payment.invoice.venue.nama,
       jumlah: payment.jumlah,

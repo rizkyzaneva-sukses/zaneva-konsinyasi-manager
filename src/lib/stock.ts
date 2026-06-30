@@ -34,7 +34,7 @@ export async function calculateStok(
     }),
     db.laporanPenjualan.aggregate({
       where: { venueId, produkId },
-      _sum: { qtyTerjual: true, qtyRetur: true },
+      _sum: { qtyTerjual: true },
     }),
     db.returBarang.aggregate({
       where: { venueId, produkId },
@@ -57,7 +57,6 @@ export async function calculateStok(
   return (
     totalMovement -
     (sales._sum.qtyTerjual || 0) -
-    (sales._sum.qtyRetur || 0) -
     (returBarang._sum.qty || 0) -
     (posItems._sum.qty || 0)
   );
@@ -73,7 +72,7 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
     db.laporanPenjualan.groupBy({
       by: ['produkId'],
       where: { venueId },
-      _sum: { qtyTerjual: true, qtyRetur: true },
+      _sum: { qtyTerjual: true },
     }),
     db.returBarang.groupBy({
       by: ['produkId'],
@@ -114,7 +113,6 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
 
   for (const item of laporanPenjualan) {
     terjualMap.set(item.produkId, (terjualMap.get(item.produkId) || 0) + (item._sum.qtyTerjual || 0));
-    returMap.set(item.produkId, (returMap.get(item.produkId) || 0) + (item._sum.qtyRetur || 0));
   }
 
   for (const item of returBarang) {

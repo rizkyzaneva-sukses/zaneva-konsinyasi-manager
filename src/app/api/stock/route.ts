@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Webhook: BAST terbit
-    sendWebhook('BAST_TERBIT', {
+    await sendWebhook('BAST_TERBIT', {
       venueNama: stokMasuk.venue.nama,
       produkNama: stokMasuk.produk.nama,
       qty: stokMasuk.qty,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     const venueStock = await getVenueStock(data.venueId);
     const currentStock = venueStock.find((item) => item.produkId === data.produkId);
     if (currentStock && currentStock.sisaStok <= currentStock.minStok) {
-      sendWebhook('STOK_RENDAH', {
+      await sendWebhook('STOK_RENDAH', {
         venueNama: stokMasuk.venue.nama,
         produkNama: stokMasuk.produk.nama,
         sisaStok: currentStock.sisaStok,

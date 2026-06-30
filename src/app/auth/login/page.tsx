@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Lock } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -102,6 +103,15 @@ export default function LoginPage() {
             >
               {loading ? 'Masuk...' : 'Masuk'}
             </button>
+
+            <div className="text-center">
+              <Link
+                href="/auth/forgot-password"
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                Lupa Password?
+              </Link>
+            </div>
           </form>
         </div>
 
