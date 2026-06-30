@@ -24,13 +24,16 @@ export async function GET(request: NextRequest) {
       where.status = status;
     }
     if (from || to) {
-      where.AND = Array.isArray(where.AND) ? where.AND : [];
+      const andConditions: Record<string, unknown>[] = Array.isArray(where.AND)
+        ? (where.AND as Record<string, unknown>[])
+        : [];
       if (from) {
-        where.AND.push({ periodeMulai: { gte: new Date(from) } });
+        andConditions.push({ periodeMulai: { gte: new Date(from) } });
       }
       if (to) {
-        where.AND.push({ periodeAkhir: { lte: new Date(to) } });
+        andConditions.push({ periodeAkhir: { lte: new Date(to) } });
       }
+      where.AND = andConditions;
     }
 
     const invoices = await prisma.invoice.findMany({
