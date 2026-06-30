@@ -38,6 +38,12 @@ enum PaymentStatus {
   REJECTED
 }
 
+enum PosOrderStatus {
+  PAID
+  REFUNDED
+  VOID
+}
+
 model User {
   id           String   @id @default(uuid()) @db.Uuid
   nama         String
@@ -75,6 +81,8 @@ model Venue {
   invoices             Invoice[]
   returBarang          ReturBarang[]
   reorderPoints        ReorderPoint[]
+  venueProduks         VenueProduk[]
+  posOrders            PosOrder[]
 
   @@index([status])
 }
@@ -95,9 +103,28 @@ model Produk {
   invoiceItems     InvoiceItem[]
   returBarang      ReturBarang[]
   reorderPoints     ReorderPoint[]
+  venueProduks     VenueProduk[]
+  posOrderItems    PosOrderItem[]
 
   @@index([kategori])
   @@index([sku])
+}
+
+model VenueProduk {
+  id          String   @id @default(uuid()) @db.Uuid
+  venueId     String   @db.Uuid
+  produkId    String   @db.Uuid
+  hargaJual   Int
+  aktif       Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  venue       Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  produk      Produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
+
+  @@unique([venueId, produkId])
+  @@index([venueId])
+  @@index([produkId])
 }
 
 model StokMasuk {
@@ -139,6 +166,62 @@ model LaporanPenjualan {
   @@index([venueId])
   @@index([produkId])
   @@index([tanggal])
+}
+
+model PosOrder {
+  id             String        @id @default(uuid()) @db.Uuid
+  orderNo        String        @unique
+  venueId        String        @db.Uuid
+  cashierName    String?
+  customerName   String?
+  customerPhone  String?
+  subtotal       Int           @default(0)
+  diskonTotal    Int           @default(0)
+  grandTotal     Int
+  status         PosOrderStatus @default(PAID)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  venue          Venue         @relation(fields: [venueId], references: [id])
+  items          PosOrderItem[]
+  payments       PosPayment[]
+
+  @@index([venueId])
+  @@index([createdAt])
+  @@index([orderNo])
+}
+
+model PosOrderItem {
+  id             String    @id @default(uuid()) @db.Uuid
+  posOrderId     String    @db.Uuid
+  produkId       String    @db.Uuid
+  produkName     String
+  sku            String?
+  qty            Int
+  harga          Int
+  basePrice      Int
+  diskonAmount   Int       @default(0)
+  lineTotal      Int
+
+  posOrder       PosOrder  @relation(fields: [posOrderId], references: [id], onDelete: Cascade)
+  produk         Produk    @relation(fields: [produkId], references: [id])
+
+  @@index([posOrderId])
+  @@index([produkId])
+}
+
+model PosPayment {
+  id           String   @id @default(uuid()) @db.Uuid
+  posOrderId   String   @db.Uuid
+  method       String
+  amount       Int
+  referenceNo  String?
+  paidAt       DateTime @default(now())
+
+  posOrder     PosOrder @relation(fields: [posOrderId], references: [id], onDelete: Cascade)
+
+  @@index([posOrderId])
 }
 
 model Invoice {

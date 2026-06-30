@@ -63,3 +63,49 @@ export const returSchema = z.object({
   alasan: z.string().min(1, 'Alasan wajib diisi'),
   tanggal: z.string().optional(),
 });
+
+// Venue Produk
+export const venueProdukSchema = z.object({
+  venueId: z.string().uuid(),
+  produkId: z.string().uuid(),
+  hargaJual: z.number().min(0),
+  aktif: z.boolean().optional(),
+});
+
+export const bulkHargaSchema = z.object({
+  venueId: z.string().uuid(),
+  items: z.array(z.object({
+    produkId: z.string().uuid(),
+    hargaJual: z.number().min(0),
+    aktif: z.boolean().optional(),
+  })).min(1),
+});
+
+// POS
+export const posOrderSchema = z.object({
+  venueId: z.string().uuid(),
+  items: z.array(z.object({
+    produkId: z.string().uuid(),
+    qty: z.number().min(1),
+    harga: z.number().min(0),
+    basePrice: z.number().min(0),
+    diskonAmount: z.number().min(0).optional(),
+  })).min(1),
+  payments: z.array(z.object({
+    method: z.string(),
+    amount: z.number().min(0),
+    referenceNo: z.string().optional(),
+  })).min(1),
+  customerName: z.string().optional(),
+  customerPhone: z.string().optional(),
+  diskonTotal: z.number().min(0).optional(),
+  notes: z.string().optional(),
+  cashierName: z.string().optional(),
+});
+
+export const posRefundSchema = z.object({
+  posOrderId: z.string().uuid(),
+  type: z.enum(['Refund', 'Void']),
+  amount: z.number().min(0).optional(),
+  reason: z.string().min(1, 'Alasan wajib diisi'),
+});

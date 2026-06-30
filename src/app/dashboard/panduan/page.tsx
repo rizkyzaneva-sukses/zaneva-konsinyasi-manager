@@ -462,6 +462,51 @@ export default function PanduanPage() {
               </TipBox>
             </GuideSection>
 
+            {/* POS (Point of Sale) */}
+            <GuideSection
+              icon={ShoppingCart}
+              title="POS (Point of Sale)"
+              color="#f59e0b"
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                Jual produk langsung ke customer dengan interface kasir. Stok otomatis berkurang setiap transaksi.
+              </p>
+              <Steps>
+                <Step num={1} title="Buka Halaman POS" desc="Klik menu 'POS' di sidebar venue. Tampilan pecah dua: katalog produk (kiri) dan keranjang (kanan)." />
+                <Step num={2} title="Pilih Produk" desc="Klik produk di katalog untuk menambahkan ke keranjang. Gunakan search atau filter kategori untuk cari produk cepat." />
+                <Step num={3} title="Atur Qty & Diskon" desc="Ubah jumlah (qty) dengan tombol +/-. Bisa juga kasih diskon per item atau diskon total." />
+                <Step num={4} title="Isi Data Customer" desc="Opsional: masukkan nama dan nomor HP customer. Berguna untuk riwayat transaksi." />
+                <Step num={5} title="Pilih Pembayaran" desc="Klik 'Bayar' → pilih metode (Tunai/QRIS/Transfer/EDC). Bisa split payment beberapa metode." />
+                <Step num={6} title="Selesai" desc="Setelah bayar, muncul struk. Bisa langsung print atau share. Klik 'Transaksi Baru' untuk mulai lagi." />
+              </Steps>
+              <TipBox type="info">
+                Stok produk akan otomatis berkurang sesuai qty yang terjual. Cek halaman Stok untuk melihat sisa stok real-time.
+              </TipBox>
+              <TipBox type="warning">
+                Harga yang tampil di POS sudah disesuaikan per venue (bukan harga default). Admin bisa ubah harga per venue di menu &apos;Harga per Venue&apos;.
+              </TipBox>
+            </GuideSection>
+
+            {/* Harga per Venue */}
+            <GuideSection
+              icon={Package}
+              title="Harga per Venue (Bulk Edit)"
+              color="#8b5cf6"
+            >
+              <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+                Atur produk mana saja yang dijual tiap venue, beserta harganya. Setiap venue bisa beda harga.
+              </p>
+              <Steps>
+                <Step num={1} title="Pilih Venue" desc="Di halaman 'Harga per Venue', pilih venue dari dropdown. Semua produk master akan muncul di tabel." />
+                <Step num={2} title="Atur Harga" desc="Klik kolom 'Harga Venue' untuk edit harga khusus venue ini. Kosongkan = pakai harga default dari master produk." />
+                <Step num={3} title="Aktif/Nonaktif" desc="Toggle status aktif. Produk nonaktif tidak tampil di POS venue tersebut." />
+                <Step num={4} title="Simpan Semua" desc="Klik 'Simpan Semua' untuk menyimpan perubahan harga dan status sekaligus (bulk update)." />
+              </Steps>
+              <TipBox type="info">
+                Misal: Adrea White harga default Rp85.000. Venue A jual Rp90.000, Venue B Rp85.000, Venue C tidak jual produk ini.
+              </TipBox>
+            </GuideSection>
+
             {/* Export & Laporan */}
             <GuideSection
               icon={FileText}

@@ -59,6 +59,18 @@ export function getStatusLabel(status: string): string {
     DROP_AWAL: 'Drop Awal',
     RESTOCK: 'Restock',
     PENARIKAN: 'Penarikan',
+    PAID: 'Lunas',
+    REFUNDED: 'Dikembalikan',
+    VOID: 'Dibatalkan',
   };
   return labels[status] || status;
+}
+
+export function generateOrderNo(): string {
+  const now = new Date();
+  const pad = (n: number, l = 2) => String(n).padStart(l, '0');
+  const datePart = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const timePart = `${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
+  const rand = Math.random().toString(16).slice(2, 7).toUpperCase();
+  return `POS-${datePart}-${timePart}-${rand}`;
 }

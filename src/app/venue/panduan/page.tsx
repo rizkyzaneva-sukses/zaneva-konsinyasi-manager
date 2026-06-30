@@ -104,7 +104,7 @@ export default function VenuePanduanPage() {
         </div>
 
         {/* Input Penjualan */}
-        <GuideSection icon={ShoppingCart} title="Input Penjualan Harian" color="#10b981" defaultOpen={true}>
+        <GuideSection icon={ClipboardList} title="Input Penjualan Harian" color="#10b981" defaultOpen={true}>
           <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
             Catat penjualan produk Zaneva setiap hari agar data akurat.
           </p>
@@ -116,6 +116,27 @@ export default function VenuePanduanPage() {
           </Steps>
           <TipBox type="tip">
             Catat penjualan setiap hari di waktu yang sama (misal sebelum tutup toko) agar tidak lupa.
+          </TipBox>
+        </GuideSection>
+
+        {/* POS (Point of Sale) */}
+        <GuideSection icon={ShoppingCart} title="POS — Jual Langsung ke Customer" color="#f59e0b">
+          <p className="text-sm text-[hsl(var(--muted-foreground))] mt-4">
+            Interface kasir untuk jual produk langsung. Lebih cepat dari input manual — pilih produk, bayar, selesai. Stok otomatis berkurang.
+          </p>
+          <Steps>
+            <Step num={1} title="Buka menu POS" desc="Klik menu 'POS' di sidebar. Tampilan pecah dua: katalog produk (kiri) dan keranjang (kanan)." />
+            <Step num={2} title="Pilih Produk" desc="Klik produk di katalog untuk menambahkan ke keranjang. Gunakan search atau filter kategori untuk cari cepat." />
+            <Step num={3} title="Atur Qty & Diskon" desc="Ubah jumlah (qty) dengan tombol +/-. Bisa kasih diskon per item atau diskon total." />
+            <Step num={4} title="Isi Data Customer (Opsional)" desc="Masukkan nama dan nomor HP customer jika ingin dicatat." />
+            <Step num={5} title="Pilih Pembayaran" desc="Klik 'Bayar' → pilih metode (Tunai/QRIS/Transfer/EDC). Bisa split payment beberapa metode sekaligus." />
+            <Step num={6} title="Selesai!" desc="Setelah bayar, muncul struk. Bisa langsung print atau share. Klik 'Transaksi Baru' untuk mulai lagi." />
+          </Steps>
+          <TipBox type="info">
+            Harga yang tampil di POS sudah sesuai harga per venue (bukan harga default). Stok otomatis berkurang setiap transaksi.
+          </TipBox>
+          <TipBox type="warning">
+            Pastikan stok mencukupi sebelum transaksi. Jika stok habis, produk tidak bisa dijual.
           </TipBox>
         </GuideSection>
 
@@ -151,6 +172,15 @@ export default function VenuePanduanPage() {
           <div className="mt-4 space-y-4">
             <div>
               <p className="text-sm font-medium text-[hsl(var(--foreground))]">
+                ❓ POS dan Input Penjualan, bedanya apa?
+              </p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1 ml-9">
+                <strong>POS</strong> = jual langsung ke customer dengan keranjang + bayar. Stok otomatis berkurang. Cocok untuk toko fisik.<br />
+                <strong>Input Penjualan</strong> = catat manual qty terjual. Cocok untuk laporan harian tanpa alur kasir.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[hsl(var(--foreground))]">
                 ❓ Lupa input penjualan kemarin, bisa diisi?
               </p>
               <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1 ml-9">
@@ -179,6 +209,14 @@ export default function VenuePanduanPage() {
               </p>
               <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1 ml-9">
                 Buka menu Riwayat → tab Invoice. Di sana terlihat semua tagihan beserta statusnya.
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[hsl(var(--foreground))]">
+                ❓ Produk yang saya jual di POS beda harga, kenapa?
+              </p>
+              <p className="text-xs text-[hsl(var(--muted-foreground))] mt-1 ml-9">
+                Harga bisa disesuaikan per venue oleh admin. Hubungi admin jika ada harga yang salah.
               </p>
             </div>
           </div>

@@ -12,6 +12,7 @@ type StockRow = {
   totalPenarikan: number;
   totalTerjual: number;
   totalRetur: number;
+  totalPosTerjual: number;
   sisaStok: number;
   minStok: number;
   isBelowRop: boolean;
@@ -26,7 +27,7 @@ export async function calculateStok(
   produkId: string,
   db: DbClient = prisma
 ): Promise<number> {
-  const [stokMovements, sales, returBarang] = await Promise.all([
+  const [stokMovements, sales, returBarang, posItems] = await Promise.all([
     db.stokMasuk.findMany({
       where: { venueId, produkId },
       select: { qty: true, jenis: true },
@@ -37,6 +38,13 @@ export async function calculateStok(
     }),
     db.returBarang.aggregate({
       where: { venueId, produkId },
+      _sum: { qty: true },
+    }),
+    db.posOrderItem.aggregate({
+      where: {
+        produkId,
+        posOrder: { venueId, status: 'PAID' },
+      },
       _sum: { qty: true },
     }),
   ]);
@@ -50,12 +58,13 @@ export async function calculateStok(
     totalMovement -
     (sales._sum.qtyTerjual || 0) -
     (sales._sum.qtyRetur || 0) -
-    (returBarang._sum.qty || 0)
+    (returBarang._sum.qty || 0) -
+    (posItems._sum.qty || 0)
   );
 }
 
 export async function getVenueStock(venueId: string, db: DbClient = prisma): Promise<StockRow[]> {
-  const [stokMovements, laporanPenjualan, returBarang, reorderPoints, produks] = await Promise.all([
+  const [stokMovements, laporanPenjualan, returBarang, reorderPoints, produks, posItems] = await Promise.all([
     db.stokMasuk.groupBy({
       by: ['produkId', 'jenis'],
       where: { venueId },
@@ -78,6 +87,13 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
     db.produk.findMany({
       where: { aktif: true },
       orderBy: { nama: 'asc' },
+    }),
+    db.posOrderItem.groupBy({
+      by: ['produkId'],
+      where: {
+        posOrder: { venueId, status: 'PAID' },
+      },
+      _sum: { qty: true },
     }),
   ]);
 
@@ -105,6 +121,11 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
     returMap.set(item.produkId, (returMap.get(item.produkId) || 0) + (item._sum.qty || 0));
   }
 
+  const posTerjualMap = new Map<string, number>();
+  for (const item of posItems) {
+    posTerjualMap.set(item.produkId, (posTerjualMap.get(item.produkId) || 0) + (item._sum.qty || 0));
+  }
+
   const ropMap = new Map(reorderPoints.map((item) => [item.produkId, item.minStok]));
 
   return produks.map((produk) => {
@@ -112,7 +133,8 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
     const totalPenarikan = penarikanMap.get(produk.id) || 0;
     const totalTerjual = terjualMap.get(produk.id) || 0;
     const totalRetur = returMap.get(produk.id) || 0;
-    const sisaStok = totalMasuk - totalPenarikan - totalTerjual - totalRetur;
+    const totalPosTerjual = posTerjualMap.get(produk.id) || 0;
+    const sisaStok = totalMasuk - totalPenarikan - totalTerjual - totalRetur - totalPosTerjual;
     const minStok = ropMap.get(produk.id) ?? 5;
 
     return {
@@ -125,6 +147,7 @@ export async function getVenueStock(venueId: string, db: DbClient = prisma): Pro
       totalPenarikan,
       totalTerjual,
       totalRetur,
+      totalPosTerjual,
       sisaStok,
       minStok,
       isBelowRop: sisaStok <= minStok,
