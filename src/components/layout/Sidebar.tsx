@@ -38,7 +38,6 @@ const adminMenuItems = [
   { href: '/dashboard/venue-produk', label: 'Harga per Venue', icon: Store },
   { href: '/dashboard/stock', label: 'Stok', icon: Truck },
   { href: '/dashboard/pos', label: 'POS Orders', icon: Receipt },
-  { href: '/dashboard/sales', label: 'Penjualan', icon: ShoppingCart },
   { href: '/dashboard/invoices', label: 'Invoice', icon: FileText },
   { href: '/dashboard/payments', label: 'Pembayaran', icon: CreditCard },
   { href: '/dashboard/returns', label: 'Retur', icon: RotateCcw },
@@ -55,7 +54,6 @@ const staffMenuItems = [
   { href: '/dashboard/venue-produk', label: 'Harga per Venue', icon: Store },
   { href: '/dashboard/stock', label: 'Stok', icon: Truck },
   { href: '/dashboard/pos', label: 'POS Orders', icon: Receipt },
-  { href: '/dashboard/sales', label: 'Penjualan', icon: ShoppingCart },
   { href: '/dashboard/invoices', label: 'Invoice', icon: FileText },
   { href: '/dashboard/payments', label: 'Pembayaran', icon: CreditCard },
   { href: '/dashboard/returns', label: 'Retur', icon: RotateCcw },
@@ -65,7 +63,6 @@ const staffMenuItems = [
 const venueMenuItems = [
   { href: '/venue/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/venue/pos', label: 'POS', icon: ShoppingCart },
-  { href: '/venue/sales', label: 'Input Penjualan', icon: ClipboardList },
   { href: '/venue/returns', label: 'Retur', icon: RotateCcw },
   { href: '/venue/history', label: 'Riwayat', icon: FileText },
   { href: '/venue/panduan', label: 'Panduan', icon: BookOpen },
